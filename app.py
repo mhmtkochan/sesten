@@ -953,6 +953,12 @@ SPEED_NAMES = {key: name for key, name, _ in SPEEDS}
 DANGER = {"light": "#C0392B", "dark": "#E5675A"}
 
 
+def fmt_pct(p):
+    """Yüzde yazımı: Türkçede %37, diğer dillerde 37%."""
+    n = int(p * 100)
+    return f"%{n}" if LANG == "tr" else f"{n}%"
+
+
 def fcount(n):
     if LANG == "en":
         return f"{n} file" if n == 1 else f"{n} files"
@@ -1201,7 +1207,7 @@ class QRow:
         self.sub = ctk.CTkLabel(self.stat, text="", text_color=T("muted"), font=app.font(12), anchor="e")
         self.sub.pack(fill="x")
 
-        self.actions = ctk.CTkFrame(f, fg_color="transparent")
+        self.actions = ctk.CTkFrame(f, fg_color="transparent", width=1, height=1)   # boşken 200 px yer kaplamasın
         self.actions.grid(row=0, column=4, padx=(6, 18), sticky="e")
         self.btn_x = ctk.CTkButton(self.actions, text="✕", width=32, height=32, corner_radius=16, fg_color="transparent",
                                    hover_color=T("zone"), text_color=T("muted"), font=app.font(15),
@@ -1294,11 +1300,11 @@ class QRow:
         j = self.job
         if j.status == "running":
             began = j.t_start is not None
-            self.pct.configure(text=f"%{int(j.pct * 100)}" if began else "—")
+            self.pct.configure(text=fmt_pct(j.pct) if began else "—")
             self.bar.set(j.pct)
             self.sub.configure(text=(j.eta_text or tr("Hesaplanıyor…")) if began else j.note)
         elif j.status == "done":
-            self.pct.configure(text="%100")
+            self.pct.configure(text=fmt_pct(1))
             self.bar.set(1)
             self.sub.configure(text=tr("Tamamlandı"))
 
@@ -3113,7 +3119,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.bn_title.configure(text=tr("Sıradaki dosya dönüştürülüyor · {i}/{n}", i=idx, n=len(run)))
             self.bn_name.configure(text=short_name(cur.name, 60))
             self.bn_bar.set(cur.pct if cur.status == "running" else 0)
-            self.bn_pct.configure(text=f"%{int(cur.pct * 100)}" if cur.status == "running" else "—")
+            self.bn_pct.configure(text=fmt_pct(cur.pct) if cur.status == "running" else "—")
             if not self._spin_job:
                 self._spin()
         elif run and all(j.status == "done" for j in run):

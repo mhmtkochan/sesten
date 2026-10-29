@@ -1,64 +1,76 @@
-# Medya - Text Dönüştürücü
+# Media - Text Converter
 
-Ses ve video dosyalarını **yazıya çeviren**, internete bağlanmadan çalışan bir Windows programı.
-Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da altyazı olarak indirin.
+**English** · [Türkçe](README.tr.md)
 
-![Giriş ekranı](docs/ekran-giris.png)
+A Windows program that turns audio and video files into text, **fully offline**. Drag your files in, pick a speed,
+and download the transcript as Word, PDF, plain text or subtitles. (Turkish name: *Medya - Text Dönüştürücü*.)
 
-## Özellikler
+![Home screen](docs/en/home.png)
 
-- **Çevrimdışı çalışır.** Ses ve videolarınız bilgisayarınızdan dışarı çıkmaz. Yalnızca ilk kullanımda gerekli dosyalar bir kere indirilir.
-- **Birden fazla dosya (kuyruk):** Dosyaları birlikte seçin ya da sürükleyin; sırayla çevrilir. Her dosya için hız ve konuşma dili ayrı seçilebilir, ilk transkript biter bitmez açılır, diğerleri arka planda sürerken okuyup indirebilirsiniz.
-- **Çoğu biçimi açar:** MP3, WAV, M4A, AAC, OGG, FLAC, MP4, MKV, MOV, AVI, WEBM ve daha fazlası.
-- **Çevirme hızı seçilir:** Otomatik, Hızlı, Dengeli, Güvenli. Her seçeneğin yanında dosyaya göre tahmini süre görünür, çeviri sırasında yüzde ve kalan süre gösterilir.
-- **İki metin biçimi:** düz metin ve zaman damgalı metin. İkisini birden de indirebilirsiniz.
-- **Dört dosya biçimi:** Word (`.docx`), PDF, metin (`.txt`) ve altyazı (`.srt`).
-- **Doğrudan dosya bağlantısı** yapıştırarak çeviri (örneğin `.mp3` ya da `.mp4` ile biten adresler).
-- **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
-- Konuşma dili otomatik algılanır ya da elle seçilir (Türkçe dahil 17 dil).
-- **Yeni sürüm bildirimi:** Program açılışta GitHub'daki son sürüm numarasına bakar; daha yeni bir sürüm varsa ana ekranda "İndir" düğmeli bir uyarı çıkar. Kendiliğinden güncellenmez, kurulum dosyasını tarayıcıda siz indirirsiniz. Bağlantı yoksa sessizce atlanır. Kapatmak için `%APPDATA%\MedyaTextDonusturucu\config.json` dosyasına `"update_check": false` ekleyin.
-- **Dört dilli arayüz (Türkçe, İngilizce, Almanca, İtalyanca):** Ana ekranın sağ üstündeki dil butonuyla (bayraklı) değiştirilir. Varsayılan Türkçe'dir.
+## Features
 
-| Seçenekler | Sonuç |
+- **Works offline.** Your recordings never leave your computer. Only the speech models are downloaded, once, on first use.
+- **Opens most formats:** MP3, WAV, M4A, AAC, OGG, FLAC, MP4, MKV, MOV, AVI, WEBM and more.
+- **Several files at once (queue):** choose or drag in up to 30 files. They are transcribed one after another, each
+  with its own speed and spoken language. The first transcript opens as soon as it is ready, and you can read and
+  download it while the rest keep running in the background.
+- **Pick the speed:** Automatic, Fast, Balanced or Accurate. Each option shows an estimate for your file, and while
+  it runs you see the percentage and the time left. Estimates adjust to your own computer after the first run.
+- **Two kinds of text:** plain text and text with timestamps. You can download both at once.
+- **Four file formats:** Word (`.docx`), PDF, text (`.txt`) and subtitles (`.srt`).
+- **Direct file links:** paste a link ending in `.mp3`, `.mp4` and so on instead of choosing a file.
+- **Spoken language** is detected automatically or chosen by hand (17 languages, including Turkish, English, German
+  and Italian).
+- **Interface in four languages:** Turkish, English, German and Italian. Switch with the flag button at the top right
+  of the home screen. Turkish is the default.
+- **Seven colours, light, dark or automatic theme:** Soft, Caramel, Honey, Sage, Ocean, Daffodil, Lavender.
+- **New version notice:** on startup the program checks GitHub for a newer release and shows a small banner with a
+  download button. Nothing is installed automatically. To turn this off, add `"update_check": false` to
+  `%APPDATA%\MedyaTextDonusturucu\config.json`.
+
+| Options | Result |
 |---|---|
-| ![Seçenekler](docs/ekran-secenekler.png) | ![Sonuç](docs/ekran-sonuc.png) |
+| ![Options](docs/en/options.png) | ![Result](docs/en/result.png) |
 
-![Çoklu dosya kuyruğu](docs/ekran-kuyruk.png)
+![Queue with several files](docs/en/queue.png)
 
-![Koyu tema](docs/ekran-koyu.png)
+| Language menu | Dark theme |
+|---|---|
+| ![Language menu](docs/en/languages.png) | ![Dark theme](docs/en/dark.png) |
 
-## Kurulum (kullanıcılar için)
+## Installation (for users)
 
-1. [Releases](../../releases) sayfasından **`MedyaTextKurulum.exe`** dosyasını indirin.
-2. Çift tıklayıp "İleri" diyerek kurun. Yönetici izni gerekmez, program kullanıcı klasörünüze kurulur.
-3. Başlat menüsünden ya da masaüstü kısayolundan açın.
+1. Download **`MedyaTextKurulum.exe`** from the [Releases](../../releases) page.
+2. Double-click it and click "Next". No administrator rights are needed; the program is installed in your user folder.
+3. Start it from the Start menu or the desktop shortcut.
 
-**Windows uyarısı:** Program imzalı olmadığı için ilk açılışta mavi bir "Windows bilgisayarınızı korudu" ekranı
-çıkabilir. "Ek bilgi" → "Yine de çalıştır" deyin. Bazı antivirüs programları yeni ve imzasız programlara yanlış
-alarm verebilir.
+**Windows warning:** the program is not code-signed, so a blue "Windows protected your PC" screen may appear on the
+first launch. Click "More info", then "Run anyway". Some antivirus programs may also raise a false alarm for new,
+unsigned programs.
 
-**Gereksinimler:** 64 bit Windows 10 veya 11. İlk kullanımda seçilen hıza göre ek dosyalar indirilir:
+**Requirements:** 64-bit Windows 10 or 11. On first use, extra files are downloaded depending on the speed you choose:
 
-| Hız | İndirme | Not |
+| Speed | Download | Note |
 |---|---|---|
-| Hızlı | yaklaşık 500 MB | günlük kayıtlar için yeterli |
-| Dengeli | yaklaşık 1,6 GB | hız ve doğruluk bir arada |
-| Güvenli | yaklaşık 3 GB | en yüksek doğruluk, en yavaşı |
+| Fast | about 500 MB | enough for everyday recordings |
+| Balanced | about 1.6 GB | speed and accuracy together |
+| Accurate | about 3 GB | highest accuracy, slowest |
 
-Bu dosyalar kullanıcı klasöründe saklanır ve bir daha indirilmez. Güvenli hız için en az 4 GB boş yer önerilir.
-Program yalnızca işlemciyi kullanır (ekran kartı gerekmez).
+These files are stored in your user folder and are never downloaded again. At least 4 GB of free space is recommended
+for the Accurate speed. The program uses the processor only (no graphics card needed).
 
-## Sınırlar
+## Limits
 
-- Kuyrukta en fazla **30 dosya** bulunur ve dosyalar **sırayla** çevrilir (aynı anda tek dosya işlenir).
-- Bağlantı özelliği yalnızca **doğrudan ses/video dosyası bağlantılarını** destekler. YouTube gibi video sitelerinin
-  sayfa bağlantıları, Google Drive paylaşım bağlantıları desteklenmez.
-- Çeviri süresi bilgisayarınızın hızına bağlıdır. Tahmini süreler ilk çeviriden sonra kendi bilgisayarınıza göre düzelir.
-- Yalnızca Windows için hazırlandı. Android/web sürümü şimdilik yok.
+- The queue holds up to **30 files** and processes them **one at a time**, in order.
+- Links work only for **direct audio/video file links**. Page links from video sites and Google Drive share links
+  are not supported.
+- Transcription time depends on your computer. The estimates adjust to your machine after the first run.
+- Windows only for now. There is no Android or web version yet.
+- If a file has no audio track or is damaged, it is marked "Unreadable" in the queue and skipped.
 
-## Kaynaktan çalıştırma ve derleme
+## Running from source and building
 
-Python 3.13 (64 bit) gerekir.
+Python 3.13 (64-bit) is required.
 
 ```powershell
 git clone https://github.com/mhmtkochan/medya-text-donusturucu.git C:\mt
@@ -68,56 +80,28 @@ py -3.13 -m venv venv
 .\venv\Scripts\python.exe app.py
 ```
 
-`.exe` ve kurulum dosyasını üretmek için (kurulum dosyası için [Inno Setup 6](https://jrsoftware.org/isinfo.php) gerekir):
+To build the `.exe` and the installer ([Inno Setup 6](https://jrsoftware.org/isinfo.php) is needed for the installer):
 
 ```powershell
 .\build.ps1
 ```
 
-> **Klasör yolunu kısa tutun** (örneğin `C:\mt`). Uzun yollarda `onnxruntime` "Dosya adı çok uzun" hatası verir.
+> **Keep the folder path short** (for example `C:\mt`). With long paths `onnxruntime` fails with "File name too long".
 
-Pencere açmadan hızlı bir deneme için: `MedyaText.exe --selftest ses.wav sonuc.txt`
-(çeviriyi ve Word/PDF yazmayı dener, sonucu dosyaya yazar).
+For a quick check without opening a window: `MedyaText.exe --selftest sound.wav result.txt`
+(it transcribes the file, tries the Word/PDF writers and writes the result to a text file).
 
-## Dosyalar
+## Files
 
-| Dosya | Ne işe yarar |
+| File | What it is for |
 |---|---|
-| `app.py` | Programın tamamı (arayüz, çeviri, dosya çıktıları) |
-| `build.ps1` | `.exe` ve kurulum dosyasını derleyen betik |
-| `kurulum.iss` | Inno Setup kurulum betiği |
-| `app.ico` | Program simgesi |
+| `app.py` | The whole program (interface, transcription, file output) |
+| `build.ps1` | Script that builds the `.exe` and the installer (`-ExeOnly` builds only the `.exe`) |
+| `kurulum.iss` | Inno Setup installer script (Turkish and English installer) |
+| `app.ico` | Program icon |
 
-## Lisans
+## License
 
-Bu projenin kodu [MIT lisansı](LICENSE) ile yayınlanmıştır.
-Kullanılan açık kaynak bileşenler ve lisansları için [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) dosyasına bakın.
-Kurulum dosyası, GPL lisanslı bileşenler (FFmpeg içindeki x264 ve x265) içerir; ayrıntılar orada.
-
----
-
-## English
-
-**Media - Text Converter** (Turkish name: *Medya - Text Dönüştürücü*) is a Windows program that turns audio and
-video files into text, **fully offline**. Drag a file in, pick a speed, and download the transcript as Word, PDF,
-plain text or subtitles.
-
-![English interface](docs/ekran-ingilizce.png)
-
-- The interface is available in **Turkish, English, German and Italian**. Use the language button (with a flag) at the top right of
-  the main screen. Turkish is the default.
-- Download `MedyaTextKurulum.exe` from [Releases](../../releases) and run it. No administrator rights are needed.
-  Requires 64-bit Windows 10 or 11.
-- On first use, extra files (about 500 MB to 3 GB depending on the chosen speed) are downloaded once. After that
-  the program works offline.
-- Several files can be queued (up to 30). They are transcribed one after another, each with its own speed and
-  spoken language, and the first transcript opens as soon as it is ready.
-- Limits: links must point directly to an audio or video file (page links from video sites are
-  not supported); Windows only.
-- On startup the program checks GitHub for a newer release and shows a small "New version available" banner with a
-  download button (nothing is installed automatically). To turn this off, add `"update_check": false` to
-  `%APPDATA%\MedyaTextDonusturucu\config.json`.
-- Windows may show a "Windows protected your PC" warning because the program is unsigned. Click "More info", then
-  "Run anyway".
-- The source code is MIT licensed. The installer includes GPL-licensed components (x264 and x265 inside FFmpeg),
-  see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The code of this project is released under the [MIT license](LICENSE). The open-source components used and their
+licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The installer contains GPL-licensed components (x264 and x265 inside FFmpeg); details are in that file.

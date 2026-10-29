@@ -1,33 +1,33 @@
-﻿# Medya - Text Dönüştürücü derleme betiği (Windows, PowerShell)
+﻿# Medya - Text Dönüştürücü (Media - Text Converter) build script (Windows, PowerShell)
 #
-# Gerekenler:
-#   - Python 3.13 (64 bit, tkinter dahil)
-#   - Inno Setup 6 (isteğe bağlı: sadece kurulum dosyası için)
+# Requirements:
+#   - Python 3.13 (64-bit, with tkinter)
+#   - Inno Setup 6 (optional: only needed for the installer)
 #
-# ÖNEMLİ: Klasör yolu KISA olmalı (örneğin C:\mt). Uzun yollarda onnxruntime "Dosya adı çok uzun"
-# hatası verir ve derleme başarısız olur.
+# IMPORTANT: keep the folder path SHORT (for example C:\mt). With long paths onnxruntime fails with
+# "File name too long" and the build breaks.
 #
-# Kullanım:   .\build.ps1            -> dist\MedyaText.exe ve MedyaTextKurulum.exe
-#             .\build.ps1 -SadeceExe -> yalnızca dist\MedyaText.exe
-param([switch]$SadeceExe)
-# Not: "Stop" kullanılmıyor. Windows PowerShell 5.1'de PyInstaller'ın bilgi satırları (stderr) yanlışlıkla hata sayılıyor.
-# Bunun yerine her komutun başarısı çıkış koduyla kontrol edilir.
+# Usage:   .\build.ps1            -> dist\MedyaText.exe and MedyaTextKurulum.exe
+#          .\build.ps1 -ExeOnly   -> dist\MedyaText.exe only
+param([switch]$ExeOnly)
+# Note: "Stop" is not used. In Windows PowerShell 5.1 PyInstaller's info lines (stderr) are wrongly treated as errors.
+# Instead, the success of every command is checked through its exit code.
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 
-function Kontrol($ad) { if ($LASTEXITCODE -ne 0) { throw "$ad başarısız oldu (çıkış kodu $LASTEXITCODE)." } }
+function Check($name) { if ($LASTEXITCODE -ne 0) { throw "$name failed (exit code $LASTEXITCODE)." } }
 
 if ($PSScriptRoot.Length -gt 60) {
-    Write-Warning "Klasör yolu uzun ($($PSScriptRoot.Length) karakter). Daha kısa bir yola taşıyın (örneğin C:\mt)."
+    Write-Warning "The folder path is long ($($PSScriptRoot.Length) characters). Move the project to a shorter path (for example C:\mt)."
 }
 
-if (-not (Test-Path .\venv)) { py -3.13 -m venv venv; Kontrol "Sanal ortam oluşturma (Python 3.13 kurulu mu?)" }
+if (-not (Test-Path .\venv)) { py -3.13 -m venv venv; Check "Creating the virtual environment (is Python 3.13 installed?)" }
 .\venv\Scripts\python.exe -m pip install --upgrade pip
-Kontrol "pip güncelleme"
+Check "Updating pip"
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
-Kontrol "Paket kurulumu"
+Check "Installing packages"
 
-# Bazı kurulumlarda sanal ortam tkinter'ın Tcl dosyalarını bulamaz; gerekirse elle gösteriyoruz.
+# On some installations the virtual environment cannot find tkinter's Tcl files; point to them by hand if needed.
 $base = & .\venv\Scripts\python.exe -c "import sys; print(sys.base_prefix)"
 if (-not $env:TCL_LIBRARY -and (Test-Path "$base\tcl\tcl8.6")) {
     $env:TCL_LIBRARY = "$base\tcl\tcl8.6"
@@ -40,10 +40,10 @@ Remove-Item dist, build -Recurse -Force -ErrorAction SilentlyContinue
     --collect-all faster_whisper --collect-all ctranslate2 --collect-all onnxruntime `
     --collect-all tkinterdnd2 --collect-all customtkinter --collect-all av `
     --collect-all docx --collect-all fpdf --hidden-import tkinter app.py
-Kontrol "PyInstaller"
-Write-Host "Hazır: dist\MedyaText.exe"
+Check "PyInstaller"
+Write-Host "Done: dist\MedyaText.exe"
 
-if (-not $SadeceExe) {
+if (-not $ExeOnly) {
     $iscc = @(
         "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
         "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
@@ -51,9 +51,9 @@ if (-not $SadeceExe) {
     ) | Where-Object { Test-Path $_ } | Select-Object -First 1
     if ($iscc) {
         & $iscc kurulum.iss
-        Kontrol "Inno Setup"
-        Write-Host "Hazır: MedyaTextKurulum.exe"
+        Check "Inno Setup"
+        Write-Host "Done: MedyaTextKurulum.exe"
     } else {
-        Write-Warning "Inno Setup bulunamadı, kurulum dosyası oluşturulmadı. https://jrsoftware.org/isinfo.php"
+        Write-Warning "Inno Setup not found, the installer was not built. https://jrsoftware.org/isinfo.php"
     }
 }

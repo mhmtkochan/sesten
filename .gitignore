@@ -4,14 +4,14 @@ __pycache__/
 .venv/
 venv/
 
-# Derleme çıktıları
+# Build output
 build/
 dist/
 *.spec
 MedyaText.exe
 MedyaTextKurulum.exe
 
-# Geçici ve yerel dosyalar
+# Temporary and local files
 *.log
 config.json
 .vscode/
