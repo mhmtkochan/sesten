@@ -24,7 +24,7 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 import customtkinter as ctk
 from PIL import Image, ImageDraw
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 LANG = "tr"          # arayüz dili: "tr" (varsayılan) ya da "en"
@@ -41,18 +41,15 @@ EN = {
     "Ses veya video dosyasının bağlantısını yapıştırın": "Paste a link to an audio or video file",
     "Yükle": "Load",
     "veya": "or",
-    "Dosyayı buraya sürükleyebilirsiniz": "You can drag the file here",
-    "ya da buraya tıklayıp seçebilirsiniz": "or click here to choose it",
+    "Dosyaları buraya sürükleyebilirsiniz": "You can drag your files here",
+    "ya da buraya tıklayıp bir veya birden fazla dosya seçebilirsiniz": "or click here to choose one or more files",
     "MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası": "MP3 · WAV · M4A · MP4 · MKV · MOV and more",
     "Ses veya video dosyası seç": "Choose an audio or video file",
     "Ses ve video dosyaları": "Audio and video files",
     "Tüm dosyalar": "All files",
-    "Birden fazla dosya seçildi": "More than one file selected",
-    "Aynı anda yalnızca bir dosya yükleyebilirsiniz. Lütfen tek bir dosya seçin.":
-        "You can only load one file at a time. Please choose a single file.",
     "Klasör seçildi": "Folder selected",
-    "Lütfen klasör yerine tek bir ses veya video dosyası seçin.":
-        "Please choose a single audio or video file instead of a folder.",
+    "Lütfen klasör yerine ses veya video dosyaları seçin.":
+        "Please choose audio or video files instead of a folder.",
     "Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından kullanılmadığından emin olun.":
         "This file could not be opened.\n\nMake sure the file is in place and not in use by another program.",
     "Bağlantı girilmedi": "No link entered",
@@ -134,6 +131,64 @@ EN = {
         "The file could not be saved.\n\nCould not write to the chosen location. Try another folder.\n({err})",
     "Dosya indirme işlemi tamamlandı.": "File download complete.",
     "Tamam": "OK",
+    # kuyruk
+    "Dönüştürme kuyruğu": "Transcription queue",
+    "{m} seçili": "{m} selected",
+    "{m} dönüştürülüyor": "{m} in progress",
+    "Tümünü seç": "Select all",
+    "+ Dosya ekle": "+ Add files",
+    "Hepsine uygula": "Apply to all",
+    "Hız": "Speed",
+    "Dil": "Language",
+    "İndirme biçimi": "Download format",
+    "Listeyi temizle": "Clear list",
+    "Kuyruğu durdur": "Stop queue",
+    "Seçilenleri dönüştür ({n})": "Transcribe selected ({n})",
+    "Dönüştürülüyor…": "Transcribing…",
+    "Tahmini toplam süre ({files})": "Estimated total time ({files})",
+    "Tahmini toplam süre": "Estimated total time",
+    "Tahmini kalan süre ({files})": "Estimated time left ({files})",
+    "Tamamlandı": "Completed",
+    "Hazır": "Ready",
+    "Sırada · {n}": "Queued · {n}",
+    "Hata": "Error",
+    "Okunamadı": "Unreadable",
+    "sıra bekliyor": "waiting in queue",
+    "dönüştürülüyor": "in progress",
+    "tamamlandı": "completed",
+    "tahmini {t}": "est. {t}",
+    "Görüntüle": "View",
+    "kalan {t}": "{t} left",
+    "birkaç saniye kaldı": "a few seconds left",
+    "Ses bulunamadı": "No audio found",
+    "Dosya bozuk ya da desteklenmiyor": "File is damaged or not supported",
+    "Dönüştürülemedi": "Could not be transcribed",
+    "Gerekli dosyalar indiriliyor…": "Downloading required files…",
+    "{done}/{tot} dosya tamamlandı": "{done}/{tot} completed",
+    "Hepsi tamamlandı": "All completed",
+    "{n} transkript hazır": "{n} ready",
+    "{n} transkript hazır · {e} hata": "{n} ready · {e} failed",
+    "Tahmini kalan süre {t}": "Estimated time left {t}",
+    "Sıradaki dosya dönüştürülüyor · {i}/{n}": "Transcribing next file · {i}/{n}",
+    "Tüm dosyalar tamamlandı · {n}/{n}": "All files completed · {n}/{n}",
+    "Transkriptlere kuyruk ekranından ulaşabilirsiniz": "You can reach the transcripts from the queue screen",
+    "Kuyruğa git": "Go to queue",
+    "← Geri": "← Back",
+    "{name} tamamlandı · sıradaki dosya başladı": "{name} completed · next file started",
+    "{name} tamamlandı": "{name} completed",
+    "{name} dönüştürülemedi": "{name} could not be transcribed",
+    "Kuyruk durduruldu. Çalışan dosya tamamlanınca durur.": "Queue stopped. It will stop once the running file finishes.",
+    "Zaten kuyrukta": "Already in the queue",
+    "Seçtiğiniz dosyalar listede var.": "The files you chose are already in the list.",
+    "Kuyruk dolu": "Queue is full",
+    "Kuyruğa en fazla {n} dosya eklenebilir.": "The queue can hold at most {n} files.",
+    "Yeni dosya seçilsin mi?": "Start with a new file?",
+    "Kuyruk temizlenir; indirmediğiniz transkriptler kaybolur.":
+        "The queue will be cleared and transcripts you have not downloaded will be lost.",
+    "Çalışan dönüştürme de durdurulur.": "The running transcription will also be stopped.",
+    "Evet, temizle": "Yes, clear",
+    "Vazgeç": "Cancel",
+    "Üzerine yaz": "Overwrite",
 }
 
 
@@ -548,6 +603,359 @@ def render_dot(color, px=28):
     return img.resize((px, px), Image.Resampling.LANCZOS)
 
 
+# ---------------------------------------------------------------- kuyruk: dosya modeli, simgeler, işçi, satır
+AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".aac", ".ogg", ".opus", ".flac", ".wma"}
+MAX_JOBS = 30                    # kuyrukta aynı anda en fazla dosya
+SPEED_NAMES = {key: name for key, name, _ in SPEEDS}
+DANGER = {"light": "#C0392B", "dark": "#E5675A"}
+
+
+def fcount(n):
+    if LANG == "en":
+        return f"{n} file" if n == 1 else f"{n} files"
+    return f"{n} dosya"
+
+
+def short_name(name, limit):
+    return name if len(name) <= limit else name[:limit - 1] + "…"
+
+
+def spoken_short(key):
+    """Satırdaki küçük seçici için kısa dil adı."""
+    return tr("Otomatik") if key == "auto" else spoken_label(key)
+
+
+def probe_media(path):
+    """(süre, tür, hata) döndürür. tür: 'audio' | 'video'. hata: kullanıcıya gösterilecek kısa metin (Türkçe anahtar) ya da None."""
+    ext = Path(path).suffix.lower()
+    kind = "audio" if ext in AUDIO_EXTS else "video"
+    try:
+        import av
+        with av.open(path) as container:
+            if not container.streams.audio:
+                return None, kind, "Ses bulunamadı"
+            if kind == "video" and not container.streams.video:
+                kind = "audio"
+            return (container.duration / 1_000_000 if container.duration else None), kind, None
+    except Exception:  # noqa: BLE001
+        return None, kind, "Dosya bozuk ya da desteklenmiyor"
+
+
+class Job:
+    """Kuyruktaki tek bir dosya ve onun ayarları / sonucu."""
+
+    def __init__(self, path, duration, kind, speed, spoken, error=None):
+        self.id = 0
+        self.path, self.name = path, Path(path).name
+        self.duration, self.kind = duration, kind
+        self.speed, self.spoken = speed, spoken          # çevirme hızı ve konuşma dili (dosyaya özel)
+        self.checked = error is None
+        self.status = "error" if error else "ready"      # ready | queued | running | done | error
+        self.err_kind = "read" if error else None        # read: dosya okunamadı, run: dönüştürme hatası
+        self.note = error or ""                          # satırda gösterilen kısa not (hata ya da hazırlık)
+        self.pct = 0.0
+        self.segments, self.elapsed = [], 0.0
+        self.t_start = None
+        self.eta_text = ""
+        self.model_key = None
+        self.sel = False                                 # son çalıştırmaya dahil mi
+
+
+def render_file_icon(kind, pal, size=46):
+    """Temanın vurgu renginde sayfa ikonu (ses: dalga, video: oynat işareti), yuvarlak köşeli zemin üzerinde."""
+    S = 6
+    N = size * S
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    ImageDraw.Draw(img).rounded_rectangle([0, 0, N - 1, N - 1], radius=int(14 / 46 * N), fill=_hex(pal["zone"]))
+    acc = _hex(pal["accent"])
+    u = N * (30 / 46) / 40                      # 40x40'lık çizim alanı karonun ortasındaki 30/46'lık bölgeye sığar
+    off = (N - 40 * u) / 2
+
+    def tf(p):
+        return (off + p[0] * u, off + p[1] * u)
+
+    page = [tf(p) for p in rounded_polygon([(8, 5), (24, 5), (32, 13), (32, 36), (8, 36)], [3, 0, 0, 3, 3], steps=8)]
+    layer = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    w = max(2, int(2 * u))
+    ld.polygon(page, fill=acc + (41,))
+    ld.line(page + [page[0]], fill=acc + (191,), width=w, joint="curve")
+    ld.line([tf(p) for p in [(24, 5), (24, 11), (26, 13), (32, 13)]], fill=acc + (191,), width=w, joint="curve")
+    if kind == "audio":
+        for x, y1, y2 in ((14, 24, 28), (18, 20, 32), (22, 22, 30), (26, 25, 27)):
+            a, b = tf((x, y1)), tf((x, y2))
+            bw = max(2, int(2.4 * u))
+            ld.line([a, b], fill=acc + (217,), width=bw)
+            for cx, cy in (a, b):
+                ld.ellipse([cx - bw / 2, cy - bw / 2, cx + bw / 2, cy + bw / 2], fill=acc + (217,))
+    else:
+        tri = [tf(p) for p in [(16, 21.5), (16, 30.5), (24, 26)]]
+        ld.polygon(tri, fill=acc + (217,))
+        ld.line(tri + [tri[0]], fill=acc + (217,), width=max(2, int(1.6 * u)), joint="curve")
+    img = Image.alpha_composite(img, layer)
+    return img.resize((size * 2, size * 2), Image.Resampling.LANCZOS)
+
+
+def render_ring(color, k=None, px=24):
+    """Dönen halka (k: 0-11. kare) ya da, k=None ise, onay işaretli tam halka."""
+    S = 6
+    N = px * S
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    c, w = _hex(color), int(N * 0.13)
+    box = [w / 2, w / 2, N - w / 2 - 1, N - w / 2 - 1]
+    if k is None:
+        d.ellipse(box, outline=c + (255,), width=w)
+        d.line([(N * 0.30, N * 0.52), (N * 0.45, N * 0.67), (N * 0.72, N * 0.36)], fill=c + (255,), width=w, joint="curve")
+    else:
+        d.ellipse(box, outline=c + (70,), width=w)
+        d.arc(box, k * 30, k * 30 + 100, fill=c + (255,), width=w)
+    return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
+
+
+def render_info_icon(color, fg, px=64):
+    """Vurgu renginde yuvarlak içinde 'i' (onay pencereleri için)."""
+    S = 4
+    N = px * S
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse([0, 0, N - 1, N - 1], fill=_hex(color))
+    w, cx, fg = int(N * 0.095), N / 2, _hex(fg)
+    d.ellipse([cx - w * 0.75, N * 0.27 - w * 0.75, cx + w * 0.75, N * 0.27 + w * 0.75], fill=fg)
+    d.line([(cx, N * 0.43), (cx, N * 0.72)], fill=fg, width=w)
+    d.ellipse([cx - w / 2, N * 0.72 - w / 2, cx + w / 2, N * 0.72 + w / 2], fill=fg)
+    return img.resize((px, px), Image.Resampling.LANCZOS)
+
+
+class QueueWorker(threading.Thread):
+    """Seçili dosyaları sırayla çevirir. Çeviri motoru bir kere yüklenir ve kuyruk boyunca kullanılır."""
+
+    def __init__(self, run_id, specs, out_queue):
+        super().__init__(daemon=True)
+        self.run_id, self.specs, self.q = run_id, specs, out_queue
+        self.cancel = threading.Event()            # hemen iptal (pencere kapanırken, kuyruk silinirken)
+        self.stop_after = threading.Event()        # çalışan dosya bitince dur
+
+    def put(self, *msg):
+        self.q.put((msg[0], self.run_id) + msg[1:])
+
+    def run(self):
+        model, model_name = None, None
+        try:
+            from faster_whisper import WhisperModel
+            for spec in self.specs:
+                if self.cancel.is_set() or self.stop_after.is_set():
+                    break
+                jid = spec["id"]
+                self.put("q_start", jid)
+                try:
+                    _, name, beam, _, _ = MODELS[spec["model_key"]]
+                    if name != model_name:
+                        model = None                # eski modeli bırak, sonra yenisini yükle
+                        self.put("q_loading", jid, not model_cached(name))
+                        model = WhisperModel(name, device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
+                        model_name = name
+                    started = time.time()
+                    segments_iter, info = model.transcribe(
+                        spec["path"], language=spec["language"], beam_size=beam, vad_filter=True)
+                    total = info.duration or 1
+                    self.put("q_began", jid, total)
+                    result = []
+                    for seg in segments_iter:
+                        if self.cancel.is_set():
+                            return
+                        text = seg.text.strip()
+                        if text:
+                            result.append((seg.start, seg.end, text))
+                        self.put("q_progress", jid, min(seg.end / total, 1.0))
+                    self.put("q_done", jid, result, time.time() - started, total)
+                except Exception as exc:  # noqa: BLE001      # bir dosyanın hatası kuyruğu durdurmaz
+                    self.put("q_error", jid, f"{type(exc).__name__}: {exc}")
+            self.put("q_finished")
+        except Exception as exc:  # noqa: BLE001
+            self.put("q_failed", f"{type(exc).__name__}: {exc}")
+
+
+class Chip:
+    """Satırdaki küçük seçici: 'Hız  Otomatik ▾'. Tıklanınca on_click(chip) çağrılır."""
+
+    def __init__(self, app, parent, label, big=False):
+        self.app, self.locked, self.on_click = app, False, None
+        h = 36 if big else 30
+        self.frame = ctk.CTkFrame(parent, height=h, corner_radius=h // 2, fg_color=app.T("zone"), cursor="hand2")
+        self.k = ctk.CTkLabel(self.frame, text=label, text_color=app.T("muted"), font=app.font(12.5, True), height=h - 6)
+        self.v = ctk.CTkLabel(self.frame, text="", text_color=app.tone(), font=app.font(12.5, True), height=h - 6)
+        self.k.pack(side="left", padx=(13, 6))
+        self.v.pack(side="left", padx=(0, 12))
+        bind_tree(self.frame, "<Button-1>", lambda e: self._click())
+        bind_tree(self.frame, "<Enter>", lambda e: None if self.locked else self.frame.configure(fg_color=app.T("line")))
+        self.frame.bind("<Leave>", lambda e: self.frame.configure(fg_color=app.T("zone")), add="+")
+
+    def set(self, value, locked=False):
+        self.locked = locked
+        self.v.configure(text=value if locked else value + "  ▾",
+                         text_color=self.app.T("muted") if locked else self.app.tone())
+        for w in (self.frame, self.k, self.v):
+            w.configure(cursor="arrow" if locked else "hand2")
+
+    def _click(self):
+        if not self.locked and self.on_click:
+            self.on_click(self)
+
+
+class QRow:
+    """Kuyruk ekranındaki tek satır: onay kutusu, ikon, ad, hız/dil seçicileri, durum ve butonlar."""
+
+    def __init__(self, app, parent, job):
+        self.app, self.job = app, job
+        T = app.T
+        self.frame = ctk.CTkFrame(parent, fg_color=T("card"), border_width=2, border_color=T("line"), corner_radius=18)
+        self.frame.pack(fill="x", pady=(0, 10), padx=(0, 8))
+        f = self.frame
+        f.grid_columnconfigure(2, weight=1)
+        f.grid_columnconfigure(3, minsize=150)
+        f.grid_columnconfigure(4, minsize=190)
+
+        self.var = ctk.BooleanVar(value=job.checked)
+        self.cb = ctk.CTkCheckBox(
+            f, text="", variable=self.var, command=self._on_check, width=22, checkbox_width=22, checkbox_height=22,
+            corner_radius=7, border_width=2, fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
+            checkmark_color=T("on_accent"), border_color=T("dash"))
+        self.cb.grid(row=0, column=0, padx=(18, 4), pady=14)
+        self.icon = ctk.CTkLabel(f, text="", image=app.file_icon(job.kind))
+        self.icon.grid(row=0, column=1, padx=(8, 0))
+
+        info = ctk.CTkFrame(f, fg_color="transparent")
+        info.grid(row=0, column=2, sticky="w", padx=(14, 6), pady=12)
+        ctk.CTkLabel(info, text=short_name(job.name, 34), text_color=T("ink"), font=app.font(14.5, True),
+                     anchor="w").pack(fill="x")
+        self.meta = ctk.CTkLabel(info, text="", text_color=T("muted"), font=app.font(12), anchor="w")
+        self.meta.pack(fill="x")
+        self.chips = ctk.CTkFrame(info, fg_color="transparent")
+        self.chips.pack(anchor="w", pady=(8, 0))
+        self.chip_speed = Chip(app, self.chips, tr("Hız"))
+        self.chip_speed.frame.pack(side="left", padx=(0, 8))
+        self.chip_lang = Chip(app, self.chips, tr("Dil"))
+        self.chip_lang.frame.pack(side="left")
+        self.chip_speed.on_click = lambda c: app.pick_speed(job, c.frame)
+        self.chip_lang.on_click = lambda c: app.pick_spoken(job, c.frame)
+
+        self.status = ctk.CTkFrame(f, fg_color="transparent")
+        self.status.grid(row=0, column=3, padx=6, sticky="e")
+        self.tag = ctk.CTkFrame(self.status, corner_radius=13, fg_color=T("zone"))
+        self.tag_lbl = ctk.CTkLabel(self.tag, text="", font=app.font(12, True), text_color=T("muted"), height=24)
+        self.tag_lbl.pack(padx=12, pady=1)
+        self.stat = ctk.CTkFrame(self.status, fg_color="transparent")
+        self.pct = ctk.CTkLabel(self.stat, text="", text_color=T("ink"), font=app.font(19, True), anchor="e")
+        self.pct.pack(fill="x")
+        self.bar = ctk.CTkProgressBar(self.stat, width=120, height=8, corner_radius=4, fg_color=T("zone"),
+                                      progress_color=T("accent"))
+        self.bar.pack(pady=(3, 3))
+        self.sub = ctk.CTkLabel(self.stat, text="", text_color=T("muted"), font=app.font(12), anchor="e")
+        self.sub.pack(fill="x")
+
+        self.actions = ctk.CTkFrame(f, fg_color="transparent")
+        self.actions.grid(row=0, column=4, padx=(6, 18), sticky="e")
+        self.btn_x = ctk.CTkButton(self.actions, text="✕", width=32, height=32, corner_radius=16, fg_color="transparent",
+                                   hover_color=T("zone"), text_color=T("muted"), font=app.font(15),
+                                   command=lambda: app._remove_job(job))
+        self.btn_view = ctk.CTkButton(self.actions, text=tr("Görüntüle"), width=96, height=32, corner_radius=16,
+                                      fg_color=T("zone"), hover_color=T("line"), text_color=app.tone(),
+                                      font=app.font(12, True), command=lambda: app.view_job(job))
+        self.btn_dl = ctk.CTkButton(self.actions, text=tr("İndir"), width=76, height=32, corner_radius=16,
+                                    fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
+                                    text_color=T("on_accent"), font=app.font(12, True),
+                                    command=lambda: app._download_job(job))
+        self.update()
+
+    def destroy(self):
+        self.frame.destroy()
+
+    def _on_check(self):
+        self.job.checked = self.var.get()
+        self.update()
+        self.app._refresh_queue_ui()
+
+    def _show_tag(self, text, kind="plain"):
+        a = self.app
+        self.stat.pack_forget()
+        colors = {"plain": (a.T("zone"), a.T("muted")),
+                  "queued": (a.TT("card", "accent", 0.22), a.tone()),
+                  "error": (tuple(mix(a.pal(m)["card"], DANGER[m], 0.16) for m in ("light", "dark")),
+                            (DANGER["light"], DANGER["dark"]))}
+        bg, fg = colors[kind]
+        self.tag.configure(fg_color=bg)
+        self.tag_lbl.configure(text=text, text_color=fg)
+        self.tag.pack(anchor="e")
+
+    def update(self):
+        if not self.frame.winfo_exists():
+            return
+        j, a = self.job, self.app
+        T = a.T
+        locked = j.status != "ready"
+        self.var.set(j.checked)
+        self.cb.configure(state="disabled" if locked else "normal")
+        running = j.status == "running"
+        self.frame.configure(
+            border_color=T("accent") if running else a.TT("line", "accent", 0.45) if (j.checked and not locked)
+            else T("line"),
+            fg_color=a.TT("card", "accent", 0.06) if running else T("card"))
+
+        dur = fmt_duration(j.duration) if j.duration else "—"
+        if j.status == "error":
+            meta = j.note
+        elif j.status == "queued":
+            meta = f"{dur} · {tr('sıra bekliyor')}"
+        elif running:
+            meta = f"{dur} · {tr('dönüştürülüyor')}"
+        elif j.status == "done":
+            meta = f"{dur} · {tr('tamamlandı')}"
+        else:
+            est = a.est_seconds(a.model_for(j), j.duration)
+            meta = dur + (f" · {tr('tahmini {t}', t=fmt_estimate(est))}" if est else "")
+        self.meta.configure(text=meta)
+
+        if j.status == "error":
+            self.chips.pack_forget()
+        else:
+            self.chips.pack(anchor="w", pady=(8, 0))
+            self.chip_speed.set(tr(SPEED_NAMES[j.speed]), locked)
+            self.chip_lang.set(spoken_short(j.spoken), locked)
+
+        if j.status == "ready":
+            self._show_tag(tr("Hazır"))
+        elif j.status == "queued":
+            n = [x for x in a.jobs if x.status == "queued"].index(j) + 1
+            self._show_tag(tr("Sırada · {n}", n=n), "queued")
+        elif j.status == "error":
+            self._show_tag(tr("Okunamadı") if j.err_kind == "read" else tr("Hata"), "error")
+        else:
+            self.tag.pack_forget()
+            self.stat.pack(anchor="e")
+            self.update_progress()
+
+        for w in (self.btn_x, self.btn_view, self.btn_dl):
+            w.pack_forget()
+        if j.status in ("ready", "error"):
+            self.btn_x.pack()
+        elif j.status == "done":
+            self.btn_view.pack(side="left", padx=(0, 8))
+            self.btn_dl.pack(side="left")
+
+    def update_progress(self):
+        j = self.job
+        if j.status == "running":
+            began = j.t_start is not None
+            self.pct.configure(text=f"%{int(j.pct * 100)}" if began else "—")
+            self.bar.set(j.pct)
+            self.sub.configure(text=(j.eta_text or tr("Hesaplanıyor…")) if began else j.note)
+        elif j.status == "done":
+            self.pct.configure(text="%100")
+            self.bar.set(1)
+            self.sub.configure(text=tr("Tamamlandı"))
+
+
 # ---------------------------------------------------------------- arka plan işçisi
 class Worker(threading.Thread):
     def __init__(self, path, model_key, language, out_queue):
@@ -752,19 +1160,27 @@ class Dropdown:
 
 # ---------------------------------------------------------------- hata penceresi
 class ErrorDialog(ctk.CTkToplevel):
-    """Uygulamanın temasına uyan, kırmızı simgeli hata penceresi (Windows'un standart kutusu yerine)."""
+    """Uygulamanın temasına uyan pencere: kırmızı simgeli hata (kind="error") ya da onay sorusu (kind="info")."""
 
-    def __init__(self, app, message):
+    def __init__(self, app, message, kind="error", buttons=None):
         super().__init__(app)
-        self.app = app
+        self.app, self.result = app, None
         self.withdraw()
         self.title(app_title())
         self.resizable(False, False)
         self.configure(fg_color=app.T("bg"))
 
+        buttons = buttons or [(tr("Tamam"), True, True)]        # (yazı, sonuç, ana düğme mi)
+        self.default = next((value for _, value, primary in buttons if primary), None)
+        self.escape = False if len(buttons) > 1 else self.default
         head, _, body = message.strip().partition("\n\n")
-        icon = ctk.CTkImage(light_image=render_error_icon("#D14343"), dark_image=render_error_icon("#E5675A"),
-                            size=(44, 44))
+        if kind == "info":
+            pl, pd = app.pal("light"), app.pal("dark")
+            icon = ctk.CTkImage(light_image=render_info_icon(pl["accent"], pl["on_accent"]),
+                                dark_image=render_info_icon(pd["accent"], pd["on_accent"]), size=(44, 44))
+        else:
+            icon = ctk.CTkImage(light_image=render_error_icon("#D14343"), dark_image=render_error_icon("#E5675A"),
+                                size=(44, 44))
         wrap = ctk.CTkFrame(self, fg_color="transparent")
         wrap.pack(fill="both", expand=True, padx=28, pady=(26, 8))
         ctk.CTkLabel(wrap, image=icon, text="").pack(side="left", anchor="n", padx=(0, 18))
@@ -775,9 +1191,16 @@ class ErrorDialog(ctk.CTkToplevel):
         if body:
             ctk.CTkLabel(text, text=body, text_color=app.T("muted"), font=app.font(13), anchor="w", justify="left",
                          wraplength=380).pack(fill="x", pady=(10, 0))
-        ok = app._primary_button(self, tr("Tamam"), self.close, width=120)
-        ok.configure(height=40, corner_radius=20, font=app.font(14, True))
-        ok.pack(side="bottom", anchor="e", padx=28, pady=(8, 24))
+        row = ctk.CTkFrame(self, fg_color="transparent")
+        row.pack(side="bottom", anchor="e", padx=28, pady=(8, 24))
+        for label, value, primary in buttons:
+            width = max(120, 9 * len(label) + 44)
+            if primary:
+                b = app._primary_button(row, label, lambda v=value: self.close(v), width=width)
+            else:
+                b = app._soft_button(row, label, lambda v=value: self.close(v), width=width)
+            b.configure(height=40, corner_radius=20, font=app.font(14, True))
+            b.pack(side="left", padx=(10, 0))
 
         self.update_idletasks()
         w, h = app.lg(self.winfo_reqwidth()), app.lg(self.winfo_reqheight())
@@ -786,9 +1209,9 @@ class ErrorDialog(ctk.CTkToplevel):
         self.geometry(f"{int(w)}x{int(h)}+{int(max(x, 0))}+{int(max(y, 0))}")
         self.transient(app)
         self.deiconify()
-        self.bind("<Return>", lambda e: self.close())
-        self.bind("<Escape>", lambda e: self.close())
-        self.protocol("WM_DELETE_WINDOW", self.close)
+        self.bind("<Return>", lambda e: self.close(self.default))
+        self.bind("<Escape>", lambda e: self.close(self.escape))
+        self.protocol("WM_DELETE_WINDOW", lambda: self.close(self.escape))
         self.after(60, self._modal)
         self.after(300, self._icon)
 
@@ -807,7 +1230,8 @@ class ErrorDialog(ctk.CTkToplevel):
         except Exception:
             pass
 
-    def close(self):
+    def close(self, result=None):
+        self.result = result
         try:
             self.grab_release()
         except Exception:
@@ -838,7 +1262,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.title(app_title())
         self.geometry("920x700")
-        self.minsize(780, 640)
+        self.minsize(860, 640)
         self.configure(fg_color=self.T("bg"))
 
         self.file_path = None
@@ -863,7 +1287,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.busy = False
         self.worker = None
         self.msg_queue = queue.Queue()
-        self.segments = []
         self.model_key = "balanced"
         self.page = "home"
         self.overlay = None
@@ -874,6 +1297,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self._zone_cache = {}
         self._zone_job = None
         self._mode_seen = ctk.get_appearance_mode()
+
+        # kuyruk (birden fazla dosya)
+        self.jobs, self.qrows, self.qpage = [], {}, None
+        self.next_id, self.run_id = 0, 0
+        self.qworker, self.queue_running = None, False
+        self.done_order, self.auto_jumped = [], False
+        self.view, self.queue_mode = None, False                 # sonuç ekranında gösterilen dosya
+        self.banner, self.nav_prev = None, None
+        self._icon_cache, self._spin_cache = {}, {}
+        self._spin_job, self._spin_k = None, 0
 
         self._build_header()
         self.container = ctk.CTkFrame(self, fg_color="transparent")
@@ -905,7 +1338,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.tmp_dir = None
 
     def _on_close(self):
-        for w in (self.worker, self.link_worker):
+        for w in (self.worker, self.link_worker, self.qworker):
             if w is not None:
                 w.cancel.set()
         self._cleanup_tmp()
@@ -1166,7 +1599,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.close_overlay()
         self.page = page
         for child in self.container.winfo_children():
-            child.destroy()
+            if child is self.qpage:                    # kuyruk ekranı yeniden kurulmasın diye saklanır
+                child.pack_forget()
+            else:
+                child.destroy()
         self.zone_frame = None
         self.stack = None
         self._show_header_buttons(page == "home")
@@ -1226,9 +1662,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.zone_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         zc = self.T("zone")
-        title = ctk.CTkLabel(zf, text=tr("Dosyayı buraya sürükleyebilirsiniz"), text_color=self.T("ink"),
+        title = ctk.CTkLabel(zf, text=tr("Dosyaları buraya sürükleyebilirsiniz"), text_color=self.T("ink"),
                              fg_color=zc, bg_color=zc, font=self.font(23, True), cursor="hand2")
-        sub = ctk.CTkLabel(zf, text=tr("ya da buraya tıklayıp seçebilirsiniz"), text_color=self.T("muted"),
+        sub = ctk.CTkLabel(zf, text=tr("ya da buraya tıklayıp bir veya birden fazla dosya seçebilirsiniz"), text_color=self.T("muted"),
                            fg_color=zc, bg_color=zc, font=self.font(14.5), cursor="hand2")
         fmts = ctk.CTkLabel(zf, text=tr("MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası"), text_color=self.T("muted"),
                             fg_color=zc, bg_color=zc, font=self.font(12), cursor="hand2")
@@ -1283,9 +1719,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def _browse(self):
         if self.busy:
             return
-        path = filedialog.askopenfilename(title=tr("Ses veya video dosyası seç"), filetypes=media_types())
-        if path:
-            self._load_file(path)
+        paths = filedialog.askopenfilenames(title=tr("Ses veya video dosyası seç"), filetypes=media_types())
+        if paths:
+            self.add_files(list(paths))
 
     def _on_drag_enter(self, event):
         self._set_zone_highlight(True)
@@ -1301,15 +1737,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         return event.action
 
     def _handle_drop(self, paths):
-        if self.busy or self.page != "home":
+        if self.busy or self.page not in ("home", "queue"):
             return
-        if len(paths) > 1:
-            self.notify(tr("Birden fazla dosya seçildi"),
-                        tr("Aynı anda yalnızca bir dosya yükleyebilirsiniz. Lütfen tek bir dosya seçin."))
-        elif paths and os.path.isdir(paths[0]):
-            self.notify(tr("Klasör seçildi"), tr("Lütfen klasör yerine tek bir ses veya video dosyası seçin."))
-        elif paths:
-            self._load_file(paths[0])
+        if paths:
+            self.add_files([str(p) for p in paths])
 
     def _load_file(self, path):
         if not os.path.isfile(path):
@@ -1347,28 +1778,35 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.status_label.configure(text=tr("İptal ediliyor…"))
 
     # ------------------------------------------------------------ 2) seçenekler
-    def est_seconds(self, key):
-        if not self.file_duration:
+    def est_seconds(self, key, duration=-1):
+        if duration == -1:                         # verilmediyse seçenekler ekranındaki dosya
+            duration = self.file_duration
+        if not duration:
             return None
         ratio = self.cfg.get("ratios", {}).get(key, MODELS[key][3])
-        return self.file_duration * ratio + 8
+        return duration * ratio + 8
 
-    def resolved_model(self):
-        if self.speed != "auto":
-            return self.speed
-        if not self.file_duration:
+    def resolved_model(self, speed=None, duration=-1):
+        speed = speed or self.speed
+        if duration == -1:
+            duration = self.file_duration
+        if speed != "auto":
+            return speed
+        if not duration:
             return "balanced"
         for key in ("best", "balanced"):          # tahmini süresi 15 dk'yı geçmeyen en doğru model
-            if self.est_seconds(key) <= 900:
+            if self.est_seconds(key, duration) <= 900:
                 return key
         return "fast"
 
-    def speed_items(self):
+    def speed_items(self, duration=-1):
+        if duration == -1:
+            duration = self.file_duration
         items = []
         for key, name, desc in SPEEDS:
             right = ""
-            if key != "auto" and self.file_duration:
-                right = fmt_estimate(self.est_seconds(key))
+            if key != "auto" and duration:
+                right = fmt_estimate(self.est_seconds(key, duration))
             items.append(dict(key=key, name=tr(name), desc=tr(desc), right=right))
         return items
 
@@ -1485,6 +1923,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             pass
         if self.busy and self.t_start:
             self._update_eta()
+        if self.queue_running:
+            self._tick_queue()
         mode = ctk.get_appearance_mode()
         if mode != self._mode_seen:
             self._mode_seen = mode
@@ -1493,7 +1933,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def _handle(self, msg):
         kind = msg[0]
-        if kind == "loading":
+        if kind.startswith("q_"):
+            self._handle_queue(msg)
+        elif kind == "loading":
             self.status_label.configure(
                 text=tr("İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet "
                         "bağlantısı gerekir.") if msg[1] else tr("Dönüştürme işlemi hazırlanıyor…"))
@@ -1511,9 +1953,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         elif kind == "done":
             _, segments, elapsed, total = msg
             self.busy = False
-            self._remember_speed(elapsed, total)
-            self.segments = segments
-            self.show_result(elapsed)
+            self._remember_speed(self.model_key, elapsed, total)
+            job = Job(self.file_path, self.file_duration, "audio", self.speed, self.spoken)
+            job.name = self.display_name or Path(self.file_path).name
+            job.status, job.segments, job.elapsed = "done", segments, elapsed
+            self.view, self.queue_mode = job, False
+            self.show_result()
         elif kind == "dl_progress":
             self.status_label.configure(text=tr("Dosya indiriliyor…"))
             if msg[1] is not None:
@@ -1556,67 +2001,725 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             return
         self.status_label.configure(text=tr("Tahmini kalan süre: {t}", t=fmt_duration(remaining)))
 
-    def _remember_speed(self, elapsed, total):
+    def _remember_speed(self, key, elapsed, total):
         if total >= 20:
             ratios = self.cfg.setdefault("ratios", {})
-            old = ratios.get(self.model_key)
+            old = ratios.get(key)
             new = elapsed / total
-            ratios[self.model_key] = new if old is None else round(0.5 * old + 0.5 * new, 4)
+            ratios[key] = new if old is None else round(0.5 * old + 0.5 * new, 4)
             save_config(self.cfg)
 
+    # ------------------------------------------------------------ 3b) kuyruk
+    def _new_job(self, path):
+        dur, kind, err = probe_media(path)
+        job = Job(path, dur, kind, self.speed, self.spoken, tr(err) if err else None)
+        self.next_id += 1
+        job.id = self.next_id
+        return job
+
+    def file_icon(self, kind, size=46):
+        key = (kind, size, self.color)
+        if key not in self._icon_cache:
+            self._icon_cache[key] = ctk.CTkImage(
+                light_image=render_file_icon(kind, self.pal("light"), size),
+                dark_image=render_file_icon(kind, self.pal("dark"), size), size=(size, size))
+        return self._icon_cache[key]
+
+    def ring_frames(self, done=False):
+        key = (self.color, done)
+        if key not in self._spin_cache:
+            light, dark = self.pal("light")["accent"], self.pal("dark")["accent"]
+            self._spin_cache[key] = [
+                ctk.CTkImage(light_image=render_ring(light, k), dark_image=render_ring(dark, k), size=(24, 24))
+                for k in ([None] if done else range(12))]
+        return self._spin_cache[key]
+
+    def model_for(self, job):
+        return self.resolved_model(job.speed, job.duration)
+
+    def add_files(self, paths):
+        """Seçilen ya da sürüklenen dosyaları ekler. Kuyruk boşken tek dosya seçenekler ekranına, gerisi kuyruğa gider."""
+        files = [p for p in paths if os.path.isfile(p)]
+        if not files:
+            if any(os.path.isdir(p) for p in paths):
+                self.notify(tr("Klasör seçildi"), tr("Lütfen klasör yerine ses veya video dosyaları seçin."))
+            else:
+                self.show_error(tr("Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program "
+                                   "tarafından kullanılmadığından emin olun."))
+            return
+        known = {os.path.normcase(os.path.abspath(j.path)) for j in self.jobs}
+        fresh = []
+        for p in files:
+            key = os.path.normcase(os.path.abspath(p))
+            if key not in known:
+                known.add(key)
+                fresh.append(p)
+        if not fresh:
+            self.notify(tr("Zaten kuyrukta"), tr("Seçtiğiniz dosyalar listede var."))
+            return
+        if not self.jobs and len(fresh) == 1:
+            self._load_file(fresh[0])
+            return
+        room = MAX_JOBS - len(self.jobs)
+        if room <= 0:
+            self.notify(tr("Kuyruk dolu"), tr("Kuyruğa en fazla {n} dosya eklenebilir.", n=MAX_JOBS))
+            return
+        self.jobs.extend(self._new_job(p) for p in fresh[:room])
+        if self.page == "queue":
+            self._sync_rows()
+            self._refresh_queue_ui()
+        else:
+            self.show_queue()
+        if len(fresh) > room:
+            self.notify(tr("Kuyruk dolu"), tr("Kuyruğa en fazla {n} dosya eklenebilir.", n=MAX_JOBS))
+
+    def show_queue(self):
+        self._goto("queue")
+        if self.qpage is None or not self.qpage.winfo_exists():
+            self._build_queue_page()
+        self.qpage.pack(fill="both", expand=True)
+        self._sync_rows()
+        for row in self.qrows.values():
+            row.update()
+        self._refresh_queue_ui()
+
+    def _build_queue_page(self):
+        T = self.T
+        q = ctk.CTkFrame(self.container, fg_color="transparent")
+        self.qpage = q
+        self.q_fmt_shown = False
+
+        # alt çubuklar önce paketlenir; liste kalan alanı doldurur
+        bar = ctk.CTkFrame(q, fg_color="transparent")
+        bar.pack(side="bottom", fill="x")
+        bar.grid_columnconfigure(1, weight=1)
+        self.q_clear = self._soft_button(bar, tr("Listeyi temizle"), self._clear_list, width=140, height=42)
+        self.q_clear.grid(row=0, column=0)
+        tot = ctk.CTkFrame(bar, fg_color="transparent")
+        tot.grid(row=0, column=2, padx=(0, 18))
+        self.q_tot_lbl = self._label(tot, "", 12, color="muted", anchor="e")
+        self.q_tot_lbl.pack(fill="x")
+        self.q_tot_val = self._label(tot, "—", 17, True, anchor="e")
+        self.q_tot_val.pack(fill="x")
+        self.q_stop = self._soft_button(bar, tr("Kuyruğu durdur"), self._stop_queue, width=150, height=46)
+        self.q_stop.grid(row=0, column=3, padx=(0, 10))
+        self.q_stop.grid_remove()
+        self.q_go = self._primary_button(bar, "", self._start_queue, width=270)
+        self.q_go.grid(row=0, column=4)
+
+        st = ctk.CTkFrame(q, fg_color="transparent")
+        st.pack(side="bottom", fill="x", pady=(6, 14))
+        self._label(st, tr("Hepsine uygula"), 13, True, color="muted").pack(side="left", padx=(2, 12))
+        self.g_speed = Chip(self, st, tr("Hız"), big=True)
+        self.g_speed.frame.pack(side="left", padx=(0, 8))
+        self.g_lang = Chip(self, st, tr("Dil"), big=True)
+        self.g_lang.frame.pack(side="left")
+        self.g_speed.on_click = lambda c: self.pick_global_speed(c.frame)
+        self.g_lang.on_click = lambda c: self.pick_global_spoken(c.frame)
+        self.q_fmt = ctk.CTkFrame(st, fg_color="transparent")          # ilk transkript hazır olunca görünür
+        self._label(self.q_fmt, tr("İndirme biçimi"), 13, True, color="muted").pack(side="left", padx=(0, 12))
+        self.q_fmt_dd = Dropdown(self, self.q_fmt, 240, self.format_items, lambda: self.fmt, self._on_format, up=True)
+        self.q_fmt_dd.btn.pack(side="left")
+
+        head = ctk.CTkFrame(q, fg_color="transparent")
+        head.pack(fill="x", pady=(2, 10))
+        titles = ctk.CTkFrame(head, fg_color="transparent")
+        titles.pack(side="left")
+        self._label(titles, tr("Dönüştürme kuyruğu"), 22, True, anchor="w").pack(fill="x")
+        self.q_sub = self._label(titles, "", 13, color="muted", anchor="w")
+        self.q_sub.pack(fill="x")
+        self._soft_button(head, tr("+ Dosya ekle"), self._browse, width=120, height=38).pack(side="right")
+        self.q_all_var = ctk.BooleanVar(value=True)
+        self.q_all = ctk.CTkCheckBox(
+            head, text=tr("Tümünü seç"), variable=self.q_all_var, command=self._toggle_all, width=20,
+            checkbox_width=22, checkbox_height=22, corner_radius=7, border_width=2, fg_color=T("accent"),
+            hover_color=self.TT("accent", "ink", 0.12), checkmark_color=T("on_accent"), border_color=T("dash"),
+            text_color=T("ink"), text_color_disabled=T("muted"), font=self.font(13.5, True))
+        self.q_all.pack(side="right", padx=(0, 18))
+
+        self.q_list = ctk.CTkScrollableFrame(
+            q, fg_color="transparent", corner_radius=0, scrollbar_button_color=T("line"),
+            scrollbar_button_hover_color=T("dash"))
+        self.q_list.pack(fill="both", expand=True)
+
+        self.q_overall = ctk.CTkFrame(q, fg_color=self.TT("card", "accent", 0.10), border_width=2,
+                                      border_color=self.TT("line", "accent", 0.5), corner_radius=16)
+        self.q_ov_shown = False
+        ov_text = ctk.CTkFrame(self.q_overall, fg_color="transparent")
+        ov_text.pack(side="left", padx=(20, 10), pady=12)
+        self.q_ov_title = self._label(ov_text, "", 14, True, anchor="w", height=22)
+        self.q_ov_title.pack(fill="x")
+        self.q_ov_sub = self._label(ov_text, "", 12.5, color="muted", anchor="w", height=18)
+        self.q_ov_sub.pack(fill="x")
+        self.q_ov_bar = ctk.CTkProgressBar(self.q_overall, width=260, height=10, corner_radius=5,
+                                           fg_color=T("zone"), progress_color=T("accent"))
+        self.q_ov_bar.pack(side="right", padx=22)
+        self.q_ov_bar.set(0)
+
+    def _sync_rows(self):
+        ids = {j.id for j in self.jobs}
+        for jid in [i for i in self.qrows if i not in ids]:
+            self.qrows.pop(jid).destroy()
+        for j in self.jobs:
+            if j.id not in self.qrows:
+                self.qrows[j.id] = QRow(self, self.q_list, j)
+
+    def _update_all_rows(self):
+        if self.page == "queue":
+            for row in self.qrows.values():
+                row.update()
+
+    def _remaining_seconds(self, jobs):
+        total = 0.0
+        for j in jobs:
+            if j.status in ("done", "error"):
+                continue
+            est = self.est_seconds(j.model_key or self.model_for(j), j.duration)
+            if est:
+                total += est * (1 - (j.pct if j.status == "running" else 0))
+        return total
+
+    def _refresh_queue_ui(self):
+        if self.page != "queue" or self.qpage is None:
+            return
+        jobs = self.jobs
+        ready = [j for j in jobs if j.status == "ready"]
+        picked = [j for j in ready if j.checked]
+        run = [j for j in jobs if j.sel]
+        running = self.queue_running
+        status = tr("{m} dönüştürülüyor", m=len(run)) if running else tr("{m} seçili", m=len(picked))
+        self.q_sub.configure(text=f"{fcount(len(jobs))} · {status}")
+        self.q_all_var.set(bool(ready) and all(j.checked for j in ready))
+        self.q_all.configure(state="normal" if ready and not running else "disabled")
+        can = bool(picked) and not running
+        self.q_go.configure(
+            text=tr("Dönüştürülüyor…") if running else tr("Seçilenleri dönüştür ({n})", n=len(picked)),
+            state="normal" if can else "disabled", fg_color=self.T("accent") if can else self.T("line"),
+            text_color=self.T("on_accent"), text_color_disabled=self.T("muted"))
+        if running:
+            self.q_stop.grid()
+        else:
+            self.q_stop.grid_remove()
+        self.q_clear.configure(state="disabled" if running else "normal")
+        self.g_speed.set(tr(SPEED_NAMES[self.speed]))
+        self.g_lang.set(spoken_short(self.spoken))
+        show_fmt = any(j.status == "done" for j in jobs)
+        if show_fmt != self.q_fmt_shown:
+            self.q_fmt_shown = show_fmt
+            if show_fmt:
+                self.q_fmt.pack(side="right")
+            else:
+                self.q_fmt.pack_forget()
+        self._refresh_totals()
+
+    def _refresh_totals(self):
+        if self.page != "queue" or self.qpage is None:
+            return
+        jobs = self.jobs
+        picked = [j for j in jobs if j.status == "ready" and j.checked]
+        run = [j for j in jobs if j.sel]
+        left = self._remaining_seconds(run)
+        if run:
+            fin = [j for j in run if j.status in ("done", "error")]
+            done = [j for j in run if j.status == "done"]
+            if len(fin) == len(run):
+                errs = len(run) - len(done)
+                self.q_ov_title.configure(text=tr("Hepsi tamamlandı"))
+                self.q_ov_sub.configure(text=tr("{n} transkript hazır · {e} hata", n=len(done), e=errs) if errs
+                                        else tr("{n} transkript hazır", n=len(done)))
+            else:
+                self.q_ov_title.configure(text=tr("{done}/{tot} dosya tamamlandı", done=len(fin), tot=len(run)))
+                self.q_ov_sub.configure(text=tr("Tahmini kalan süre {t}", t=fmt_estimate(left)) if left
+                                        else tr("Hesaplanıyor…"))
+            self.q_ov_bar.set(sum(1.0 if j.status in ("done", "error") else j.pct for j in run) / len(run))
+            if not self.q_ov_shown:
+                self.q_ov_shown = True
+                self.q_overall.pack(fill="x", pady=(0, 10), before=self.q_list._parent_frame)   # listenin dış çerçevesi
+        elif self.q_ov_shown:
+            self.q_ov_shown = False
+            self.q_overall.pack_forget()
+
+        if self.queue_running:
+            n = len([j for j in run if j.status not in ("done", "error")])
+            lbl, val = tr("Tahmini kalan süre ({files})", files=fcount(n)), fmt_estimate(left) if left else "…"
+        elif picked:
+            total = sum(self.est_seconds(self.model_for(j), j.duration) or 0 for j in picked)
+            lbl = tr("Tahmini toplam süre ({files})", files=fcount(len(picked)))
+            val = fmt_estimate(total) if total else "—"
+        elif run:
+            lbl, val = "", tr("Tamamlandı")
+        else:
+            lbl, val = tr("Tahmini toplam süre"), "—"
+        self.q_tot_lbl.configure(text=lbl)
+        self.q_tot_val.configure(text=val)
+
+    def _toggle_all(self):
+        on = self.q_all_var.get()
+        for j in self.jobs:
+            if j.status == "ready":
+                j.checked = on
+        self._update_all_rows()
+        self._refresh_queue_ui()
+
+    def _remove_job(self, job):
+        if job.status not in ("ready", "error") or job not in self.jobs:
+            return
+        self.jobs.remove(job)
+        self._after_list_change()
+
+    def _clear_list(self):
+        if self.queue_running:
+            return
+        self.jobs[:] = [j for j in self.jobs if j.status not in ("ready", "error")]
+        self._after_list_change()
+
+    def _after_list_change(self):
+        if not self.jobs:
+            self._reset_queue()
+            self.show_home()
+        else:
+            self._sync_rows()
+            self._refresh_queue_ui()
+
+    def _reset_queue(self):
+        """Kuyruğu ve sonuçlarını tamamen siler (çalışan varsa durdurur)."""
+        if self.qworker is not None:
+            self.qworker.cancel.set()
+            self.qworker = None
+        self.run_id += 1                              # eski işçiden gelen mesajlar yok sayılır
+        self.queue_running = False
+        self.jobs, self.done_order, self.qrows = [], [], {}
+        self.view, self.auto_jumped = None, False
+        if self.qpage is not None:
+            try:
+                self.qpage.destroy()
+            except Exception:
+                pass
+            self.qpage = None
+
+    # ---- hız / dil seçicileri
+    def open_menu(self, anchor, items, current, on_pick, min_width=230):
+        """Bir düğmenin altında (sığmazsa üstünde) açılan seçim listesi. Uzun listeler kaydırılır."""
+        tag = ("menu", str(anchor))
+        if self.overlay and self.overlay[3] == tag:
+            self.close_overlay()
+            return
+        pop = ctk.CTkFrame(self, fg_color=self.T("card"), border_width=1, border_color=self.T("line"), corner_radius=16)
+        compact = not any(it.get("desc") for it in items)
+        scroll = len(items) > 7
+        host = pop
+        if scroll:
+            host = ctk.CTkScrollableFrame(pop, fg_color="transparent", corner_radius=0,
+                                          scrollbar_button_color=self.T("line"),
+                                          scrollbar_button_hover_color=self.T("dash"))
+            host.pack(fill="both", expand=True, padx=(8, 2), pady=8)
+        for i, it in enumerate(items):
+            on = it["key"] == current
+            base = self.TT("card", "accent", 0.18) if on else "transparent"
+            row = ctk.CTkFrame(host, corner_radius=11, fg_color=base, cursor="hand2")
+            if scroll:
+                row.pack(fill="x", padx=(0, 6), pady=(0, 2))
+            else:
+                row.pack(fill="x", padx=8, pady=(8 if i == 0 else 0, 8 if i == len(items) - 1 else 2))
+            left = ctk.CTkFrame(row, fg_color="transparent")
+            left.pack(side="left", padx=(12, 6), pady=6 if compact else 7)
+            ctk.CTkLabel(left, text=it["name"], text_color=self.T("ink"), font=self.font(14 if not compact else 13.5, True),
+                         anchor="w").pack(fill="x")
+            if it.get("desc"):
+                ctk.CTkLabel(left, text=it["desc"], text_color=self.T("muted"), font=self.font(11.5),
+                             anchor="w").pack(fill="x")
+            if it.get("right"):
+                ctk.CTkLabel(row, text=it["right"], text_color=self.T("ink"), font=self.font(12.5, True)).pack(
+                    side="right", padx=12)
+            hover = self.T("zone")
+            bind_tree(row, "<Enter>", lambda e, r=row, h=hover: r.configure(fg_color=h))
+            row.bind("<Leave>", lambda e, r=row, b=base: Dropdown._leave(r, b, e), add="+")
+            bind_tree(row, "<Button-1>", lambda e, k=it["key"]: self.after(10, lambda: self._menu_pick(on_pick, k)))
+        pop.update_idletasks()
+        w = max(min_width, self.lg(pop.winfo_reqwidth()))
+        if scroll:
+            ph = (8 if compact else 6) * (38 if compact else 56) + 16
+        else:
+            ph = self.lg(pop.winfo_reqheight())
+        pop.pack_propagate(False)
+        pop.configure(width=w, height=ph)
+        bx = self.lg(anchor.winfo_rootx() - self.winfo_rootx())
+        by = self.lg(anchor.winfo_rooty() - self.winfo_rooty())
+        y = by + self.lg(anchor.winfo_height()) + 6
+        if y + ph > self.lg(self.winfo_height()) - 8:
+            y = max(8, by - ph - 6)
+        pop.place(x=max(8, min(bx, self.lg(self.winfo_width()) - w - 12)), y=y)
+        pop.lift()
+        self.set_overlay(pop, [anchor], tag)
+
+    def _menu_pick(self, on_pick, key):
+        self.close_overlay()
+        on_pick(key)
+
+    def spoken_items(self):
+        return [dict(key=s[0], name=spoken_label(s[0]), desc="") for s in SPOKEN]
+
+    def pick_speed(self, job, anchor):
+        if job.status == "ready":
+            self.open_menu(anchor, self.speed_items(job.duration), job.speed, lambda k: self._set_job(job, speed=k))
+
+    def pick_spoken(self, job, anchor):
+        if job.status == "ready":
+            self.open_menu(anchor, self.spoken_items(), job.spoken, lambda k: self._set_job(job, spoken=k))
+
+    def _set_job(self, job, **kw):
+        for name, value in kw.items():
+            setattr(job, name, value)
+        row = self.qrows.get(job.id)
+        if row is not None:
+            row.update()
+        self._refresh_queue_ui()
+
+    def pick_global_speed(self, anchor):
+        self.open_menu(anchor, self.speed_items(None), self.speed, self._apply_global_speed)
+
+    def pick_global_spoken(self, anchor):
+        self.open_menu(anchor, self.spoken_items(), self.spoken, self._apply_global_spoken)
+
+    def _apply_global_speed(self, key):
+        self.speed = key
+        self.cfg["speed"] = key
+        save_config(self.cfg)
+        for j in self.jobs:
+            if j.status == "ready":
+                j.speed = key
+        self._update_all_rows()
+        self._refresh_queue_ui()
+
+    def _apply_global_spoken(self, key):
+        self.spoken = key
+        self.cfg["spoken"] = key
+        save_config(self.cfg)
+        for j in self.jobs:
+            if j.status == "ready":
+                j.spoken = key
+        self._update_all_rows()
+        self._refresh_queue_ui()
+
+    # ---- çalıştırma
+    def _start_queue(self):
+        picked = [j for j in self.jobs if j.status == "ready" and j.checked]
+        if not picked or self.queue_running:
+            return
+        self.close_overlay()
+        self.run_id += 1
+        for j in self.jobs:
+            j.sel = False
+        specs = []
+        for j in picked:
+            j.sel, j.status, j.pct, j.note, j.eta_text, j.t_start = True, "queued", 0.0, "", "", None
+            j.model_key = self.model_for(j)
+            specs.append(dict(id=j.id, path=j.path, model_key=j.model_key, language=spoken_code(j.spoken)))
+        self.queue_running, self.auto_jumped = True, False
+        self.qworker = QueueWorker(self.run_id, specs, self.msg_queue)
+        self.qworker.start()
+        self._update_all_rows()
+        self._refresh_queue_ui()
+
+    def _stop_queue(self):
+        if not self.queue_running or self.qworker is None:
+            return
+        self.qworker.stop_after.set()
+        for j in self.jobs:
+            if j.status == "queued":
+                j.status, j.sel = "ready", False
+        self.notify(tr("Kuyruk durduruldu. Çalışan dosya tamamlanınca durur."), warn=False, ms=3600)
+        self._update_all_rows()
+        self._refresh_queue_ui()
+
+    def _after_state_change(self):
+        if self.page == "queue":
+            self._update_all_rows()
+            self._refresh_queue_ui()
+        elif self.page == "result" and self.queue_mode:
+            self._update_banner()
+            self._update_nav()
+
+    def _handle_queue(self, msg):
+        kind = msg[0]
+        if msg[1] != self.run_id:
+            return
+        if kind == "q_finished":
+            self.queue_running, self.qworker = False, None
+            self._after_state_change()
+            return
+        if kind == "q_failed":
+            self.queue_running, self.qworker = False, None
+            for j in self.jobs:
+                if j.status == "running":
+                    j.status, j.err_kind, j.checked = "error", "run", False
+                    j.note = tr("Dönüştürülemedi") + ": " + short_name(msg[2], 70)
+                elif j.status == "queued":
+                    j.status, j.sel = "ready", False
+            self._after_state_change()
+            self.show_error(tr("Transkript çıkarılamadı.\n\n{err}", err=msg[2]))
+            return
+        job = next((j for j in self.jobs if j.id == msg[2]), None)
+        if job is None:
+            return
+        if kind == "q_start":
+            job.status, job.pct, job.t_start, job.eta_text = "running", 0.0, None, ""
+            job.note = tr("Hazırlanıyor…")
+            self._after_state_change()
+        elif kind == "q_loading":
+            job.note = (tr("Gerekli dosyalar indiriliyor…") if msg[3] else tr("Hazırlanıyor…"))
+        elif kind == "q_began":
+            job.t_start = time.time()
+            job.duration = job.duration or msg[3]
+        elif kind == "q_progress":
+            job.pct = msg[3]
+        elif kind == "q_done":
+            _, _, _, segments, elapsed, total = msg
+            job.status, job.pct, job.segments, job.elapsed = "done", 1.0, segments, elapsed
+            self._remember_speed(job.model_key, elapsed, total)
+            self.done_order.append(job)
+            first, self.auto_jumped = not self.auto_jumped, True
+            name = short_name(job.name, 30)
+            if first and self.page == "queue":                  # ilk biten transkript kendiliğinden açılır
+                more = any(j.status == "queued" for j in self.jobs)
+                self.view_job(job)
+                self.notify(tr("{name} tamamlandı · sıradaki dosya başladı", name=name) if more
+                            else tr("{name} tamamlandı", name=name), warn=False, ms=3600)
+            else:
+                self.notify(tr("{name} tamamlandı", name=name), warn=False, ms=3000)
+                self._after_state_change()
+        elif kind == "q_error":
+            job.status, job.err_kind, job.checked = "error", "run", False
+            job.note = tr("Dönüştürülemedi") + ": " + short_name(msg[3], 70)
+            self.notify(tr("{name} dönüştürülemedi", name=short_name(job.name, 30)), short_name(msg[3], 160), ms=5500)
+            self._after_state_change()
+
+    def _tick_queue(self):
+        """Çalışan dosyanın kalan süresini ve ekrandaki ilerlemeyi tazeler (150 ms'de bir)."""
+        job = next((j for j in self.jobs if j.status == "running"), None)
+        if job is not None and job.t_start:
+            elapsed = time.time() - job.t_start
+            if job.pct >= 0.03 and elapsed >= 4:
+                remaining = elapsed * (1 - job.pct) / job.pct
+            else:
+                est = self.est_seconds(job.model_key, job.duration)
+                remaining = max(est - elapsed - 8, 0) if est else None
+            if remaining is None:
+                job.eta_text = ""
+            elif remaining < 45:
+                job.eta_text = tr("birkaç saniye kaldı")
+            else:
+                job.eta_text = tr("kalan {t}", t=fmt_estimate(remaining))
+        if self.page == "queue":
+            row = self.qrows.get(job.id) if job is not None else None
+            if row is not None:
+                row.update_progress()
+            self._refresh_totals()
+        elif self.page == "result" and self.queue_mode:
+            self._update_banner()
+
     # ------------------------------------------------------------ 4) sonuç
-    def show_result(self, elapsed):
+    def view_job(self, job):
+        self.view, self.queue_mode = job, True
+        self.show_result()
+
+    def _new_file(self):
+        if self.queue_mode and self.jobs:
+            body = tr("Kuyruk temizlenir; indirmediğiniz transkriptler kaybolur.")
+            if self.queue_running:
+                body += "\n" + tr("Çalışan dönüştürme de durdurulur.")
+            if not self.confirm(tr("Yeni dosya seçilsin mi?") + "\n\n" + body, tr("Evet, temizle"), tr("Vazgeç")):
+                return
+            self._reset_queue()
+        self.show_home()
+
+    def show_result(self):
+        job = self.view
         self._goto("result")
         page = self.container
         page.grid_columnconfigure((0, 1), weight=1, uniform="panel")
-        page.grid_rowconfigure(1, weight=1)
+        for row, weight in ((0, 0), (1, 0), (2, 1), (3, 0)):
+            page.grid_rowconfigure(row, weight=weight)
 
         head = ctk.CTkFrame(page, fg_color="transparent")
         head.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(2, 12))
+        if self.queue_mode:
+            self._soft_button(head, tr("← Geri"), self.show_queue, width=92, height=38).pack(side="left", padx=(0, 14))
         self._label(head, tr("Transkript hazır"), 22, True).pack(side="left")
-        self._label(head, tr("{t} sürdü", t=fmt_duration(elapsed)), 13, color="muted").pack(
-            side="left", padx=14, pady=(6, 0))
-        self.sel_hint = self._label(head, "", 13, color="muted")
+        self.nav_prev = None
+        if self.queue_mode:
+            self._build_nav(head)
+        else:
+            self._label(head, tr("{t} sürdü", t=fmt_duration(job.elapsed)), 13, color="muted").pack(
+                side="left", padx=14, pady=(6, 0))
+        self.sel_hint = self._label(head, "", 13, color="muted", wraplength=250, justify="right")
         self.sel_hint.pack(side="right", pady=(6, 0))
+
+        self.banner = None
+        if self.queue_mode:
+            self._build_banner(page)
 
         self.var_plain = ctk.BooleanVar(value=True)
         self.var_timed = ctk.BooleanVar(value=False)
-        total = len(self.segments)
-        shown = self.segments[:PREVIEW_LINES]           # ekranda sadece ilk satırlar; indirilen dosya tamamını içerir
-        note = (tr("İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.",
-                   n=PREVIEW_LINES, total=total) if total > PREVIEW_LINES else "")
-        self.panel_plain, self.cb_plain, self.tb_plain = self._make_panel(
-            0, tr("Düz metin"), self.var_plain, False, note)
-        self.panel_timed, self.cb_timed, self.tb_timed = self._make_panel(
-            1, tr("Zaman damgalı"), self.var_timed, True, note)
-
-        for tb, timed in ((self.tb_plain, False), (self.tb_timed, True)):
-            tb.configure(state="normal")
-            if timed:
-                for start, _, text in shown:
-                    tb.insert("end", f"{fmt_clock(start)}  ", "ts")
-                    tb.insert("end", f"{text}\n")
-            else:
-                tb.insert("1.0", "\n".join(t for _, _, t in shown))
-            if not self.segments:
-                tb.insert("1.0", tr("(Konuşma bulunamadı)"))
-            tb.configure(state="disabled")
-        self._style_text_tags()
+        self.panel_plain, self.cb_plain, self.tb_plain = self._make_panel(0, tr("Düz metin"), self.var_plain, False)
+        self.panel_timed, self.cb_timed, self.tb_timed = self._make_panel(1, tr("Zaman damgalı"), self.var_timed, True)
+        self._fill_result()
 
         bar = ctk.CTkFrame(page, fg_color="transparent")
-        bar.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(16, 0))
-        self._soft_button(bar, tr("Yeni dosya"), self.show_home, width=120, height=42).pack(side="left")
+        bar.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(16, 0))
+        self._soft_button(bar, tr("Yeni dosya"), self._new_file, width=120, height=42).pack(side="left")
         self.dl_btn = self._primary_button(bar, tr("İndir"), self._download, width=200)
         self.dl_btn.pack(side="right")
         self.fmt_dd = Dropdown(self, bar, 270, self.format_items, lambda: self.fmt, self._on_format, up=True)
         self.fmt_dd.btn.pack(side="right", padx=(12, 14))
         self._label(bar, tr("Dosya biçimi"), 14, True).pack(side="right")
         self._on_format(self.fmt)
+        self._update_nav()
+        self._update_banner()
 
-    def _make_panel(self, col, title, var, timed, note=""):
+    def _fill_result(self):
+        """Görüntülenen dosyanın metnini iki panele yazar."""
+        segments = self.view.segments
+        total = len(segments)
+        shown = segments[:PREVIEW_LINES]                # ekranda sadece ilk satırlar; indirilen dosya tamamını içerir
+        note = (tr("İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.",
+                   n=PREVIEW_LINES, total=total) if total > PREVIEW_LINES else "")
+        for panel, tb, timed in ((self.panel_plain, self.tb_plain, False), (self.panel_timed, self.tb_timed, True)):
+            tb.configure(state="normal")
+            tb.delete("1.0", "end")
+            if timed:
+                for start, _, text in shown:
+                    tb.insert("end", f"{fmt_clock(start)}  ", "ts")
+                    tb.insert("end", f"{text}\n")
+            else:
+                tb.insert("1.0", "\n".join(t for _, _, t in shown))
+            if not segments:
+                tb.insert("1.0", tr("(Konuşma bulunamadı)"))
+            tb.configure(state="disabled")
+            tb.yview_moveto(0)
+            if note:
+                panel.note.configure(text=note)
+                panel.note.pack(side="bottom", fill="x", padx=22, pady=(0, 16), before=tb)
+                tb.pack_configure(pady=(10, 6))
+            else:
+                panel.note.pack_forget()
+                tb.pack_configure(pady=(10, 20))
+        self._style_text_tags()
+
+    def _build_nav(self, head):
+        """Başlıktaki dosya seçici: ‹ simge ad 2/3 ›  (biten transkriptler arasında gezinir)."""
+        nav = ctk.CTkFrame(head, corner_radius=19, fg_color=self.T("zone"))
+        nav.pack(side="left", padx=(18, 0), pady=(2, 0))
+
+        def arrow(text, delta):
+            return ctk.CTkButton(nav, text=text, width=30, height=30, corner_radius=15, fg_color="transparent",
+                                 hover_color=self.T("line"), text_color=self.tone(), text_color_disabled=self.T("dash"),
+                                 font=self.font(17, True), command=lambda: self._nav(delta))
+
+        self.nav_prev = arrow("‹", -1)
+        self.nav_prev.pack(side="left", padx=(5, 0), pady=4)
+        self.nav_icon = ctk.CTkLabel(nav, text="", image=self.file_icon(self.view.kind, 24))
+        self.nav_icon.pack(side="left", padx=(4, 6))
+        self.nav_name = ctk.CTkLabel(nav, text="", text_color=self.T("ink"), font=self.font(13, True))
+        self.nav_name.pack(side="left")
+        self.nav_idx = ctk.CTkLabel(nav, text="", text_color=self.T("muted"), font=self.font(12.5))
+        self.nav_idx.pack(side="left", padx=(8, 0))
+        self.nav_next = arrow("›", 1)
+        self.nav_next.pack(side="left", padx=(2, 5), pady=4)
+
+    def _update_nav(self):
+        if self.page != "result" or not self.queue_mode or self.nav_prev is None or not self.nav_prev.winfo_exists():
+            return
+        job, order = self.view, self.done_order
+        p = order.index(job) if job in order else -1
+        self.nav_icon.configure(image=self.file_icon(job.kind, 24))
+        self.nav_name.configure(text=short_name(job.name, 22))
+        self.nav_idx.configure(text=f"{p + 1}/{len(order)}" if len(order) > 1 and p >= 0 else "")
+        self.nav_prev.configure(state="normal" if p > 0 else "disabled")
+        self.nav_next.configure(state="normal" if 0 <= p < len(order) - 1 else "disabled")
+
+    def _nav(self, delta):
+        order = self.done_order
+        if self.view not in order:
+            return
+        p = order.index(self.view) + delta
+        if 0 <= p < len(order):
+            self.view = order[p]
+            self._fill_result()
+            self._update_nav()
+
+    def _build_banner(self, page):
+        """Sonuç ekranının üstünde, kuyruğun durumunu gösteren şerit (tıklanınca kuyruğa gider)."""
+        b = ctk.CTkFrame(page, fg_color=self.TT("card", "accent", 0.12), border_width=2,
+                         border_color=self.TT("line", "accent", 0.5), corner_radius=16, cursor="hand2")
+        b.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 12))
+        b.grid_remove()
+        self.banner, self._banner_on, self._banner_busy = b, False, False
+        go = self._soft_button(b, tr("Kuyruğa git"), self.show_queue, width=110, height=34)
+        go.pack(side="right", padx=(10, 16), pady=10)
+        self.bn_pct = ctk.CTkLabel(b, text="", text_color=self.T("ink"), font=self.font(14, True), width=44, anchor="e")
+        self.bn_pct.pack(side="right")
+        self.bn_bar = ctk.CTkProgressBar(b, width=170, height=8, corner_radius=4, fg_color=self.T("line"),
+                                         progress_color=self.T("accent"))
+        self.bn_bar.pack(side="right", padx=(10, 8))
+        self.bn_icon = ctk.CTkLabel(b, text="", image=self.ring_frames()[0])
+        self.bn_icon.pack(side="left", padx=(16, 10), pady=10)
+        text = ctk.CTkFrame(b, fg_color="transparent")
+        text.pack(side="left", fill="x", expand=True, pady=8)       # kenarlığa değmesin
+        self.bn_title = ctk.CTkLabel(text, text="", text_color=self.T("ink"), font=self.font(13.5, True), anchor="w",
+                                     height=22)
+        self.bn_title.pack(fill="x")
+        self.bn_name = ctk.CTkLabel(text, text="", text_color=self.T("muted"), font=self.font(12), anchor="w",
+                                    height=18)
+        self.bn_name.pack(fill="x")
+        for w in (b, self.bn_icon, text, self.bn_title, self.bn_name):
+            w.bind("<Button-1>", lambda e: self.show_queue())
+
+    def _update_banner(self):
+        b = self.banner
+        if self.page != "result" or not self.queue_mode or b is None or not b.winfo_exists():
+            return
+        run = [j for j in self.jobs if j.sel]
+        cur = next((j for j in run if j.status == "running"), None) or next((j for j in run if j.status == "queued"), None)
+        if cur is not None and self.queue_running:
+            self._banner_busy = True
+            idx = run.index(cur) + 1
+            self.bn_title.configure(text=tr("Sıradaki dosya dönüştürülüyor · {i}/{n}", i=idx, n=len(run)))
+            self.bn_name.configure(text=short_name(cur.name, 60))
+            self.bn_bar.set(cur.pct if cur.status == "running" else 0)
+            self.bn_pct.configure(text=f"%{int(cur.pct * 100)}" if cur.status == "running" else "—")
+            if not self._spin_job:
+                self._spin()
+        elif run and all(j.status == "done" for j in run):
+            self._banner_busy = False
+            self.bn_icon.configure(image=self.ring_frames(True)[0])
+            self.bn_title.configure(text=tr("Tüm dosyalar tamamlandı · {n}/{n}", n=len(run)))
+            self.bn_name.configure(text=tr("Transkriptlere kuyruk ekranından ulaşabilirsiniz"))
+            self.bn_bar.set(1)
+            self.bn_pct.configure(text="✓")
+        else:
+            self._banner_busy = False
+            if self._banner_on:
+                b.grid_remove()
+                self._banner_on = False
+            return
+        if not self._banner_on:
+            b.grid()
+            self._banner_on = True
+
+    def _spin(self):
+        self._spin_job = None
+        b = self.banner
+        if self.page != "result" or b is None or not b.winfo_exists() or not self._banner_busy:
+            return
+        self._spin_k = (self._spin_k + 1) % 12
+        self.bn_icon.configure(image=self.ring_frames()[self._spin_k])
+        self._spin_job = self.after(90, self._spin)
+
+    def _make_panel(self, col, title, var, timed):
         panel = ctk.CTkFrame(self.container, fg_color=self.T("card"), border_width=2,
                              border_color=self.T("line"), corner_radius=18)
-        panel.grid(row=1, column=col, sticky="nsew", padx=(0, 7) if col == 0 else (7, 0))
+        panel.grid(row=2, column=col, sticky="nsew", padx=(0, 7) if col == 0 else (7, 0))
         head = ctk.CTkFrame(panel, fg_color="transparent")
         head.pack(fill="x", padx=22, pady=(16, 10))          # içerik yuvarlak köşe yayının dışında kalsın
         cb = ctk.CTkCheckBox(
@@ -1630,13 +2733,11 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         copy.pack(side="right")
         # ayırıcı çizgi panelin çerçevesine değmesin (aksi halde çerçeve kesiliyor)
         ctk.CTkFrame(panel, height=3, corner_radius=0, fg_color=self.TT("line", "dash", 0.3)).pack(fill="x", padx=18)
-        if note:
-            ctk.CTkLabel(panel, text=note, text_color=self.T("muted"), font=self.font(11.5), anchor="w").pack(
-                side="bottom", fill="x", padx=22, pady=(0, 16))
         tb = ctk.CTkTextbox(panel, fg_color="transparent", text_color=self.T("ink"), wrap="word",
                             font=self.font(14), border_width=0, activate_scrollbars=True,
                             scrollbar_button_color=self.T("line"), scrollbar_button_hover_color=self.T("dash"))
-        tb.pack(fill="both", expand=True, padx=20, pady=(10, 6 if note else 20))
+        tb.pack(fill="both", expand=True, padx=20, pady=(10, 20))
+        panel.note = ctk.CTkLabel(panel, text="", text_color=self.T("muted"), font=self.font(11.5), anchor="w")
         copy.configure(command=lambda b=copy, k=timed: self._copy(k, b))
         return panel, cb, tb
 
@@ -1650,7 +2751,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def _copy(self, timed, button):
         self.clipboard_clear()
-        self.clipboard_append(build_text(self.segments, timed))        # ekrandaki önizleme değil, metnin tamamı
+        self.clipboard_append(build_text(self.view.segments, timed))        # ekrandaki önizleme değil, metnin tamamı
         button.configure(text=tr("Kopyalandı ✓"))
         self.after(1500, lambda: button.winfo_exists() and button.configure(text=tr("Kopyala")))
 
@@ -1661,6 +2762,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.fmt = key
         self.cfg["format"] = key
         save_config(self.cfg)
+        if self.page != "result":
+            return
         if key == "srt":                          # altyazı = zaman damgalı metin
             self.var_plain.set(False)
             self.cb_plain.configure(state="disabled")
@@ -1690,15 +2793,21 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.sel_hint.configure(text=hint)
 
     def _download(self):
-        ext = FORMATS[self.fmt][1]
-        stem = Path(self.file_path).stem
+        stem = Path(self.view.name).stem
         wanted = []
         if self.var_plain.get():
             wanted.append((False, stem))
         if self.var_timed.get():
             wanted.append((True, tr("{stem} (zaman damgalı)", stem=stem)))
-        if not wanted:
-            return
+        if wanted:
+            self._export(self.view, wanted)
+
+    def _download_job(self, job):
+        """Kuyruktaki satırın "İndir" düğmesi: düz metni seçili biçimde kaydeder."""
+        self._export(job, [(self.fmt == "srt", Path(job.name).stem)])
+
+    def _export(self, job, wanted):
+        ext = FORMATS[self.fmt][1]
         if len(wanted) == 1:
             path = filedialog.asksaveasfilename(
                 title=tr("Kaydet"), initialfile=wanted[0][1], defaultextension=ext,
@@ -1712,17 +2821,24 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 return
             targets = [(timed, Path(folder) / f"{name}{ext}") for timed, name in wanted]
             existing = [p.name for _, p in targets if p.exists()]
-            if existing and not messagebox.askyesno(
-                    app_title(), tr("Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}", files="\n".join(existing))):
+            if existing and not self.confirm(
+                    tr("Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}", files="\n".join(existing)),
+                    tr("Üzerine yaz"), tr("Vazgeç")):
                 return
         try:
             for timed, path in targets:
-                write_export(path, self.fmt, stem, self.segments, timed or self.fmt == "srt")
+                write_export(path, self.fmt, Path(job.name).stem, job.segments, timed or self.fmt == "srt")
         except Exception as exc:  # noqa: BLE001
             self.show_error(tr("Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({err})",
                                err=exc))
             return
         self.notify(tr("Dosya indirme işlemi tamamlandı."), warn=False, ms=3600)
+
+    def confirm(self, message, yes, no):
+        """Temaya uyan evet/hayır penceresi; "evet" seçilirse True döner."""
+        dlg = ErrorDialog(self, message, kind="info", buttons=[(no, False, False), (yes, True, True)])
+        self.wait_window(dlg)
+        return bool(dlg.result)
 
 
 def selftest(audio_path, out_path):

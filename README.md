@@ -8,6 +8,7 @@ Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da a
 ## Özellikler
 
 - **Çevrimdışı çalışır.** Ses ve videolarınız bilgisayarınızdan dışarı çıkmaz. Yalnızca ilk kullanımda gerekli dosyalar bir kere indirilir.
+- **Birden fazla dosya (kuyruk):** Dosyaları birlikte seçin ya da sürükleyin; sırayla çevrilir. Her dosya için hız ve konuşma dili ayrı seçilebilir, ilk transkript biter bitmez açılır, diğerleri arka planda sürerken okuyup indirebilirsiniz.
 - **Çoğu biçimi açar:** MP3, WAV, M4A, AAC, OGG, FLAC, MP4, MKV, MOV, AVI, WEBM ve daha fazlası.
 - **Çevirme hızı seçilir:** Otomatik, Hızlı, Dengeli, Güvenli. Her seçeneğin yanında dosyaya göre tahmini süre görünür, çeviri sırasında yüzde ve kalan süre gösterilir.
 - **İki metin biçimi:** düz metin ve zaman damgalı metin. İkisini birden de indirebilirsiniz.
@@ -20,6 +21,8 @@ Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da a
 | Seçenekler | Sonuç |
 |---|---|
 | ![Seçenekler](docs/ekran-secenekler.png) | ![Sonuç](docs/ekran-sonuc.png) |
+
+![Çoklu dosya kuyruğu](docs/ekran-kuyruk.png)
 
 ![Koyu tema](docs/ekran-koyu.png)
 
@@ -46,7 +49,7 @@ Program yalnızca işlemciyi kullanır (ekran kartı gerekmez).
 
 ## Sınırlar
 
-- Aynı anda **tek dosya** çevrilir.
+- Kuyrukta en fazla **30 dosya** bulunur ve dosyalar **sırayla** çevrilir (aynı anda tek dosya işlenir).
 - Bağlantı özelliği yalnızca **doğrudan ses/video dosyası bağlantılarını** destekler. YouTube gibi video sitelerinin
   sayfa bağlantıları, Google Drive paylaşım bağlantıları desteklenmez.
 - Çeviri süresi bilgisayarınızın hızına bağlıdır. Tahmini süreler ilk çeviriden sonra kendi bilgisayarınıza göre düzelir.
@@ -106,7 +109,9 @@ plain text or subtitles.
   Requires 64-bit Windows 10 or 11.
 - On first use, extra files (about 500 MB to 3 GB depending on the chosen speed) are downloaded once. After that
   the program works offline.
-- Limits: one file at a time; links must point directly to an audio or video file (page links from video sites are
+- Several files can be queued (up to 30). They are transcribed one after another, each with its own speed and
+  spoken language, and the first transcript opens as soon as it is ready.
+- Limits: links must point directly to an audio or video file (page links from video sites are
   not supported); Windows only.
 - Windows may show a "Windows protected your PC" warning because the program is unsigned. Click "More info", then
   "Run anyway".
