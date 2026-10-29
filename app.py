@@ -31,7 +31,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
 LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.1.1"
 REPO = "mhmtkochan/medya-text-donusturucu"
 UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/MedyaTextKurulum.exe"
@@ -1448,9 +1448,23 @@ class UpdateChecker(threading.Thread):
 
 # ---------------------------------------------------------------- açılır liste
 def bind_tree(widget, sequence, func):
-    widget.bind(sequence, func, add="+")
-    for child in widget.winfo_children():
-        bind_tree(child, sequence, func)
+    """Bir parçaya ve içindekilere aynı olayı bağlar. CustomTkinter etiketleri içlerine de bağladığı için
+    aynı tıklama iki kez gelebilir (menü açılıp hemen kapanırdı); aynı olay ikinci kez işlenmez."""
+    seen = []
+
+    def once(event):
+        key = (event.serial, event.time, str(event.widget))
+        if seen and seen[0] == key:
+            return None
+        seen[:] = [key]
+        return func(event)
+
+    def attach(w):
+        w.bind(sequence, once, add="+")
+        for child in w.winfo_children():
+            attach(child)
+
+    attach(widget)
 
 
 class Dropdown:

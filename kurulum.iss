@@ -1,7 +1,7 @@
 ﻿; Medya - Text Dönüştürücü kurulum betiği (Inno Setup 6) / Installer script
 #define AppName "Medya - Text Dönüştürücü"
 #define AppExe "MedyaText.exe"
-#define AppVersion "1.1.0"
+#define AppVersion "1.1.1"
 
 [Setup]
 AppId={{B7C3E1A4-5D2F-4C8A-9E61-3F0A7D2B8C15}
