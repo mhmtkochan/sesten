@@ -28,7 +28,8 @@ from PIL import Image, ImageDraw
 from tkinter import filedialog
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-LANG = "tr"          # arayüz dili: "tr" (varsayılan) ya da "en"
+LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
+LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
 APP_VERSION = "1.1.0"
 REPO = "mhmtkochan/medya-text-donusturucu"
@@ -198,15 +199,330 @@ EN = {
     "Yeni sürüm var: {v}": "New version available: {v}",
 }
 
+DE = {
+    "Ses ve videodan yazıya": "Audio und Video in Text",
+    "Tema": "Design",
+    "TEMA": "DESIGN",
+    "RENK": "FARBE",
+    "Otomatik": "Automatisch",
+    "Açık": "Hell",
+    "Koyu": "Dunkel",
+    "Yumuşak": "Sanft",
+    "Karamel": "Karamell",
+    "Bal": "Honig",
+    "Adaçayı": "Salbei",
+    "Okyanus": "Ozean",
+    "Nergis": "Narzisse",
+    "Lavanta": "Lavendel",
+    "Ses veya video dosyasının bağlantısını yapıştırın": "Link zu einer Audio- oder Videodatei einfügen",
+    "Yükle": "Laden",
+    "veya": "oder",
+    "Dosyaları buraya sürükleyebilirsiniz": "Sie können Ihre Dateien hierher ziehen",
+    "ya da buraya tıklayıp bir veya birden fazla dosya seçebilirsiniz": "oder hier klicken, um eine oder mehrere Dateien auszuwählen",
+    "MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası": "MP3 · WAV · M4A · MP4 · MKV · MOV und mehr",
+    "Ses veya video dosyası seç": "Audio- oder Videodatei auswählen",
+    "Ses ve video dosyaları": "Audio- und Videodateien",
+    "Tüm dosyalar": "Alle Dateien",
+    "Klasör seçildi": "Ordner ausgewählt",
+    "Lütfen klasör yerine ses veya video dosyaları seçin.": "Bitte wählen Sie Audio- oder Videodateien statt eines Ordners aus.",
+    "Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından kullanılmadığından emin olun.": "Diese Datei konnte nicht geöffnet werden.\n\nStellen Sie sicher, dass die Datei vorhanden ist und nicht von einem anderen Programm verwendet wird.",
+    "Bağlantı girilmedi": "Kein Link eingegeben",
+    "Lütfen bir ses veya video dosyasının bağlantısını yapıştırın.": "Bitte fügen Sie den Link zu einer Audio- oder Videodatei ein.",
+    "Geçersiz bağlantı": "Ungültiger Link",
+    "Bağlantı http:// veya https:// ile başlamalıdır.": "Der Link muss mit http:// oder https:// beginnen.",
+    "Bağlantı kontrol ediliyor…": "Link wird geprüft…",
+    "Sunucu dosyayı vermedi (hata kodu {code}).\n\nBağlantının herkese açık ve doğru olduğundan emin olun.": "Der Server hat die Datei nicht bereitgestellt (Fehlercode {code}).\n\nStellen Sie sicher, dass der Link öffentlich und korrekt ist.",
+    "Bağlantıya ulaşılamadı.\n\nİnternet bağlantınızı ve adresi kontrol edin.\n\n({err})": "Der Link ist nicht erreichbar.\n\nPrüfen Sie Ihre Internetverbindung und die Adresse.\n\n({err})",
+    "Dosya alınamadı.\n\n({err})": "Die Datei konnte nicht abgerufen werden.\n\n({err})",
+    "Bu bağlantı bir ses veya video dosyası değil, bir web sayfası.\n\nYalnızca doğrudan dosya bağlantıları desteklenir (örneğin .mp3 veya .mp4 ile biten adresler). Video sitelerindeki sayfa bağlantıları desteklenmez. Dosyanız bilgisayarınızda varsa doğrudan ana ekrandaki alana sürükleyebilirsiniz.": "Dieser Link ist keine Audio- oder Videodatei, sondern eine Webseite.\n\nUnterstützt werden nur direkte Dateilinks (zum Beispiel Adressen, die auf .mp3 oder .mp4 enden). Seitenlinks von Videoportalen werden nicht unterstützt. Wenn Sie die Datei auf Ihrem Computer haben, können Sie sie in den Bereich auf dem Startbildschirm ziehen.",
+    "Bağlantıdan veri gelmedi. Adresi kontrol edin.": "Vom Link kamen keine Daten. Prüfen Sie die Adresse.",
+    "dosya": "Datei",
+    "Süre: {dur}": "Dauer: {dur}",
+    "süre okunamadı": "Dauer nicht verfügbar",
+    "Değiştir": "Ändern",
+    "Çevirme Hızı": "Transkriptionstempo",
+    "Tahmini süre": "Geschätzte Dauer",
+    "Konuşma dili": "Gesprochene Sprache",
+    "Transkripti başlat": "Transkription starten",
+    "Hızlı": "Schnell",
+    "Dengeli": "Ausgewogen",
+    "Güvenli": "Genau",
+    "Dosyaya göre en uygununu seçer": "Wählt automatisch die beste Option",
+    "En hızlı, günlük kayıtlar için": "Am schnellsten, für Alltagsaufnahmen",
+    "Hız ve doğruluk bir arada": "Tempo und Genauigkeit in einem",
+    "En yüksek doğruluk, daha yavaş": "Höchste Genauigkeit, langsamer",
+    "Otomatik: {title} seçildi": "Automatisch: {title} gewählt",
+    "İlk kullanımda ek dosyalar indirilir (yaklaşık {size}, internet gerekir)": "Beim ersten Mal werden zusätzliche Dateien (etwa {size}) heruntergeladen. Internet erforderlich.",
+    "~1,6 GB": "~1,6 GB",
+    "~1 dk'dan az": "unter 1 Min.",
+    "Hazırlanıyor…": "Wird vorbereitet…",
+    "İptal": "Abbrechen",
+    "İptal ediliyor…": "Wird abgebrochen…",
+    "İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet bağlantısı gerekir.": "Die für die erste Nutzung nötigen Dateien werden heruntergeladen…\nDas geschieht nur einmal und erfordert eine Internetverbindung.",
+    "Dönüştürme işlemi hazırlanıyor…": "Transkription wird vorbereitet…",
+    "Dosya indiriliyor…": "Datei wird heruntergeladen…",
+    "Hesaplanıyor…": "Wird berechnet…",
+    "Tahmini kalan süre: {t}": "Geschätzte Restzeit: {t}",
+    "Transkript çıkarılamadı.\n\n{err}": "Das Transkript konnte nicht erstellt werden.\n\n{err}",
+    "Transkript hazır": "Transkript fertig",
+    "{t} sürdü": "dauerte {t}",
+    "Düz metin": "Nur Text",
+    "Zaman damgalı": "Mit Zeitstempeln",
+    "(Konuşma bulunamadı)": "(Keine Sprache gefunden)",
+    "İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.": "Angezeigt werden die ersten {n} Zeilen (von {total}). Die heruntergeladene Datei enthält alles.",
+    "Yeni dosya": "Neue Datei",
+    "İndir": "Download",
+    "Dosya biçimi": "Dateiformat",
+    "Kopyala": "Kopieren",
+    "Kopyalandı ✓": "Kopiert ✓",
+    "Bir metin seçin": "Text auswählen",
+    "2 dosyayı indir": "2 Dateien laden",
+    "Sadece zaman damgalı seçildi (altyazı biçimi)": "Nur mit Zeitstempeln gewählt (Untertitelformat)",
+    "İkisi de seçildi": "Beide gewählt",
+    "Sadece düz metin seçildi": "Nur Text gewählt",
+    "Sadece zaman damgalı seçildi": "Nur mit Zeitstempeln gewählt",
+    "İndirmek istediklerinizi işaretleyin": "Markieren Sie, was Sie herunterladen möchten",
+    "Word belgesi": "Word-Dokument",
+    "Metin dosyası": "Textdatei",
+    "Altyazı": "Untertitel",
+    "Düzenlemek için en uygunu": "Am besten zum Bearbeiten",
+    "Paylaşmak ve yazdırmak için": "Zum Teilen und Drucken",
+    "En sade, her cihazda açılır": "Am einfachsten, öffnet überall",
+    "Videoya altyazı eklemek için": "Untertitel für Videos",
+    "{stem} (zaman damgalı)": "{stem} (mit Zeitstempeln)",
+    "Kaydet": "Speichern",
+    "Dosyaların kaydedileceği klasörü seçin": "Ordner zum Speichern der Dateien wählen",
+    "Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}": "Diese Dateien existieren bereits. Überschreiben?\n\n{files}",
+    "Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({err})": "Die Datei konnte nicht gespeichert werden.\n\nAn den gewählten Ort konnte nicht geschrieben werden. Versuchen Sie einen anderen Ordner.\n({err})",
+    "Dosya indirme işlemi tamamlandı.": "Download der Datei abgeschlossen.",
+    "Tamam": "OK",
+    "Dönüştürme kuyruğu": "Transkriptions-Warteschlange",
+    "{m} seçili": "{m} ausgewählt",
+    "{m} dönüştürülüyor": "{m} in Bearbeitung",
+    "Tümünü seç": "Alle auswählen",
+    "+ Dosya ekle": "+ Dateien hinzufügen",
+    "Hepsine uygula": "Auf alle anwenden",
+    "Hız": "Tempo",
+    "Dil": "Sprache",
+    "İndirme biçimi": "Download-Format",
+    "Listeyi temizle": "Liste leeren",
+    "Kuyruğu durdur": "Warteschlange stoppen",
+    "Seçilenleri dönüştür ({n})": "Ausgewählte transkribieren ({n})",
+    "Dönüştürülüyor…": "Wird transkribiert…",
+    "Tahmini toplam süre ({files})": "Geschätzte Gesamtdauer ({files})",
+    "Tahmini toplam süre": "Geschätzte Gesamtdauer",
+    "Tahmini kalan süre ({files})": "Geschätzte Restzeit ({files})",
+    "Tamamlandı": "Abgeschlossen",
+    "Hazır": "Bereit",
+    "Sırada · {n}": "Wartet · {n}",
+    "Hata": "Fehler",
+    "Okunamadı": "Nicht lesbar",
+    "sıra bekliyor": "wartet in der Schlange",
+    "dönüştürülüyor": "in Bearbeitung",
+    "tamamlandı": "abgeschlossen",
+    "tahmini {t}": "ca. {t}",
+    "Görüntüle": "Ansehen",
+    "kalan {t}": "noch {t}",
+    "birkaç saniye kaldı": "noch wenige Sekunden",
+    "Ses bulunamadı": "Kein Audio gefunden",
+    "Dosya bozuk ya da desteklenmiyor": "Datei ist beschädigt oder wird nicht unterstützt",
+    "Dönüştürülemedi": "Konnte nicht transkribiert werden",
+    "Gerekli dosyalar indiriliyor…": "Erforderliche Dateien werden heruntergeladen…",
+    "{done}/{tot} dosya tamamlandı": "{done}/{tot} abgeschlossen",
+    "Hepsi tamamlandı": "Alle abgeschlossen",
+    "{n} transkript hazır": "{n} fertig",
+    "{n} transkript hazır · {e} hata": "{n} fertig · {e} fehlgeschlagen",
+    "Tahmini kalan süre {t}": "Geschätzte Restzeit {t}",
+    "Sıradaki dosya dönüştürülüyor · {i}/{n}": "Nächste Datei wird transkribiert · {i}/{n}",
+    "Tüm dosyalar tamamlandı · {n}/{n}": "Alle Dateien abgeschlossen · {n}/{n}",
+    "Transkriptlere kuyruk ekranından ulaşabilirsiniz": "Die Transkripte finden Sie in der Warteschlange",
+    "Kuyruğa git": "Zur Warteschlange",
+    "← Geri": "← Zurück",
+    "{name} tamamlandı · sıradaki dosya başladı": "{name} abgeschlossen · nächste Datei gestartet",
+    "{name} tamamlandı": "{name} abgeschlossen",
+    "{name} dönüştürülemedi": "{name} konnte nicht transkribiert werden",
+    "Kuyruk durduruldu. Çalışan dosya tamamlanınca durur.": "Warteschlange gestoppt. Sie hält an, sobald die laufende Datei fertig ist.",
+    "Zaten kuyrukta": "Bereits in der Warteschlange",
+    "Seçtiğiniz dosyalar listede var.": "Die gewählten Dateien sind bereits in der Liste.",
+    "Kuyruk dolu": "Warteschlange ist voll",
+    "Kuyruğa en fazla {n} dosya eklenebilir.": "Die Warteschlange fasst höchstens {n} Dateien.",
+    "Yeni dosya seçilsin mi?": "Mit einer neuen Datei beginnen?",
+    "Kuyruk temizlenir; indirmediğiniz transkriptler kaybolur.": "Die Warteschlange wird geleert und nicht heruntergeladene Transkripte gehen verloren.",
+    "Çalışan dönüştürme de durdurulur.": "Die laufende Transkription wird ebenfalls gestoppt.",
+    "Evet, temizle": "Ja, leeren",
+    "Vazgeç": "Abbrechen",
+    "Üzerine yaz": "Überschreiben",
+    "Yeni sürüm var: {v}": "Neue Version verfügbar: {v}",
+}
+
+IT = {
+    "Ses ve videodan yazıya": "Da audio e video a testo",
+    "Tema": "Tema",
+    "TEMA": "TEMA",
+    "RENK": "COLORE",
+    "Otomatik": "Automatico",
+    "Açık": "Chiaro",
+    "Koyu": "Scuro",
+    "Yumuşak": "Morbido",
+    "Karamel": "Caramello",
+    "Bal": "Miele",
+    "Adaçayı": "Salvia",
+    "Okyanus": "Oceano",
+    "Nergis": "Narciso",
+    "Lavanta": "Lavanda",
+    "Ses veya video dosyasının bağlantısını yapıştırın": "Incolla il link a un file audio o video",
+    "Yükle": "Carica",
+    "veya": "oppure",
+    "Dosyaları buraya sürükleyebilirsiniz": "Puoi trascinare i tuoi file qui",
+    "ya da buraya tıklayıp bir veya birden fazla dosya seçebilirsiniz": "oppure clicca qui per scegliere uno o più file",
+    "MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası": "MP3 · WAV · M4A · MP4 · MKV · MOV e altri",
+    "Ses veya video dosyası seç": "Scegli un file audio o video",
+    "Ses ve video dosyaları": "File audio e video",
+    "Tüm dosyalar": "Tutti i file",
+    "Klasör seçildi": "Cartella selezionata",
+    "Lütfen klasör yerine ses veya video dosyaları seçin.": "Scegli file audio o video invece di una cartella.",
+    "Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından kullanılmadığından emin olun.": "Impossibile aprire questo file.\n\nAssicurati che il file sia al suo posto e non sia in uso da un altro programma.",
+    "Bağlantı girilmedi": "Nessun link inserito",
+    "Lütfen bir ses veya video dosyasının bağlantısını yapıştırın.": "Incolla il link a un file audio o video.",
+    "Geçersiz bağlantı": "Link non valido",
+    "Bağlantı http:// veya https:// ile başlamalıdır.": "Il link deve iniziare con http:// o https://.",
+    "Bağlantı kontrol ediliyor…": "Controllo del link…",
+    "Sunucu dosyayı vermedi (hata kodu {code}).\n\nBağlantının herkese açık ve doğru olduğundan emin olun.": "Il server non ha fornito il file (codice errore {code}).\n\nAssicurati che il link sia pubblico e corretto.",
+    "Bağlantıya ulaşılamadı.\n\nİnternet bağlantınızı ve adresi kontrol edin.\n\n({err})": "Impossibile raggiungere il link.\n\nControlla la connessione a internet e l'indirizzo.\n\n({err})",
+    "Dosya alınamadı.\n\n({err})": "Impossibile scaricare il file.\n\n({err})",
+    "Bu bağlantı bir ses veya video dosyası değil, bir web sayfası.\n\nYalnızca doğrudan dosya bağlantıları desteklenir (örneğin .mp3 veya .mp4 ile biten adresler). Video sitelerindeki sayfa bağlantıları desteklenmez. Dosyanız bilgisayarınızda varsa doğrudan ana ekrandaki alana sürükleyebilirsiniz.": "Questo link non è un file audio o video, ma una pagina web.\n\nSono supportati solo link diretti ai file (ad esempio indirizzi che terminano con .mp3 o .mp4). I link alle pagine dei siti video non sono supportati. Se hai il file sul computer, puoi trascinarlo nell'area della schermata principale.",
+    "Bağlantıdan veri gelmedi. Adresi kontrol edin.": "Dal link non sono arrivati dati. Controlla l'indirizzo.",
+    "dosya": "file",
+    "Süre: {dur}": "Durata: {dur}",
+    "süre okunamadı": "durata non disponibile",
+    "Değiştir": "Cambia",
+    "Çevirme Hızı": "Velocità di trascrizione",
+    "Tahmini süre": "Tempo stimato",
+    "Konuşma dili": "Lingua parlata",
+    "Transkripti başlat": "Avvia la trascrizione",
+    "Hızlı": "Veloce",
+    "Dengeli": "Bilanciato",
+    "Güvenli": "Accurato",
+    "Dosyaya göre en uygununu seçer": "Sceglie l'opzione migliore",
+    "En hızlı, günlük kayıtlar için": "Il più veloce, per l'uso quotidiano",
+    "Hız ve doğruluk bir arada": "Velocità e precisione insieme",
+    "En yüksek doğruluk, daha yavaş": "Massima precisione, più lento",
+    "Otomatik: {title} seçildi": "Automatico: scelto {title}",
+    "İlk kullanımda ek dosyalar indirilir (yaklaşık {size}, internet gerekir)": "Al primo utilizzo vengono scaricati file aggiuntivi (circa {size}). Serve internet.",
+    "~1,6 GB": "~1,6 GB",
+    "~1 dk'dan az": "meno di 1 min",
+    "Hazırlanıyor…": "Preparazione…",
+    "İptal": "Annulla",
+    "İptal ediliyor…": "Annullamento…",
+    "İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet bağlantısı gerekir.": "Download dei file necessari al primo utilizzo…\nAvviene una sola volta e richiede una connessione a internet.",
+    "Dönüştürme işlemi hazırlanıyor…": "Preparazione della trascrizione…",
+    "Dosya indiriliyor…": "Download del file…",
+    "Hesaplanıyor…": "Calcolo in corso…",
+    "Tahmini kalan süre: {t}": "Tempo rimanente stimato: {t}",
+    "Transkript çıkarılamadı.\n\n{err}": "Impossibile creare la trascrizione.\n\n{err}",
+    "Transkript hazır": "Trascrizione pronta",
+    "{t} sürdü": "ha richiesto {t}",
+    "Düz metin": "Testo semplice",
+    "Zaman damgalı": "Con timestamp",
+    "(Konuşma bulunamadı)": "(Nessun parlato trovato)",
+    "İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.": "Vengono mostrate le prime {n} righe (su {total}). Il file scaricato contiene tutto.",
+    "Yeni dosya": "Nuovo file",
+    "İndir": "Scarica",
+    "Dosya biçimi": "Formato del file",
+    "Kopyala": "Copia",
+    "Kopyalandı ✓": "Copiato ✓",
+    "Bir metin seçin": "Seleziona un testo",
+    "2 dosyayı indir": "Scarica 2 file",
+    "Sadece zaman damgalı seçildi (altyazı biçimi)": "Selezionato solo con timestamp (formato sottotitoli)",
+    "İkisi de seçildi": "Entrambi selezionati",
+    "Sadece düz metin seçildi": "Selezionato solo testo semplice",
+    "Sadece zaman damgalı seçildi": "Selezionato solo con timestamp",
+    "İndirmek istediklerinizi işaretleyin": "Seleziona ciò che vuoi scaricare",
+    "Word belgesi": "Documento Word",
+    "Metin dosyası": "File di testo",
+    "Altyazı": "Sottotitoli",
+    "Düzenlemek için en uygunu": "Ideale per modificare",
+    "Paylaşmak ve yazdırmak için": "Per condividere e stampare",
+    "En sade, her cihazda açılır": "Il più semplice, si apre ovunque",
+    "Videoya altyazı eklemek için": "Per sottotitolare un video",
+    "{stem} (zaman damgalı)": "{stem} (con timestamp)",
+    "Kaydet": "Salva",
+    "Dosyaların kaydedileceği klasörü seçin": "Scegli la cartella in cui salvare i file",
+    "Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}": "Questi file esistono già. Vuoi sovrascriverli?\n\n{files}",
+    "Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({err})": "Impossibile salvare il file.\n\nImpossibile scrivere nella posizione scelta. Prova un'altra cartella.\n({err})",
+    "Dosya indirme işlemi tamamlandı.": "Download del file completato.",
+    "Tamam": "OK",
+    "Dönüştürme kuyruğu": "Coda di trascrizione",
+    "{m} seçili": "{m} selezionati",
+    "{m} dönüştürülüyor": "{m} in corso",
+    "Tümünü seç": "Seleziona tutto",
+    "+ Dosya ekle": "+ Aggiungi file",
+    "Hepsine uygula": "Applica a tutti",
+    "Hız": "Velocità",
+    "Dil": "Lingua",
+    "İndirme biçimi": "Formato di download",
+    "Listeyi temizle": "Svuota elenco",
+    "Kuyruğu durdur": "Ferma la coda",
+    "Seçilenleri dönüştür ({n})": "Trascrivi i selezionati ({n})",
+    "Dönüştürülüyor…": "Trascrizione in corso…",
+    "Tahmini toplam süre ({files})": "Tempo totale stimato ({files})",
+    "Tahmini toplam süre": "Tempo totale stimato",
+    "Tahmini kalan süre ({files})": "Tempo rimanente stimato ({files})",
+    "Tamamlandı": "Completato",
+    "Hazır": "Pronto",
+    "Sırada · {n}": "In coda · {n}",
+    "Hata": "Errore",
+    "Okunamadı": "Illeggibile",
+    "sıra bekliyor": "in attesa nella coda",
+    "dönüştürülüyor": "in corso",
+    "tamamlandı": "completato",
+    "tahmini {t}": "circa {t}",
+    "Görüntüle": "Visualizza",
+    "kalan {t}": "{t} rimanenti",
+    "birkaç saniye kaldı": "pochi secondi rimanenti",
+    "Ses bulunamadı": "Nessun audio trovato",
+    "Dosya bozuk ya da desteklenmiyor": "Il file è danneggiato o non supportato",
+    "Dönüştürülemedi": "Impossibile trascrivere",
+    "Gerekli dosyalar indiriliyor…": "Download dei file necessari…",
+    "{done}/{tot} dosya tamamlandı": "{done}/{tot} completati",
+    "Hepsi tamamlandı": "Tutti completati",
+    "{n} transkript hazır": "{n} pronti",
+    "{n} transkript hazır · {e} hata": "{n} pronti · {e} falliti",
+    "Tahmini kalan süre {t}": "Tempo rimanente stimato {t}",
+    "Sıradaki dosya dönüştürülüyor · {i}/{n}": "Trascrizione del file successivo · {i}/{n}",
+    "Tüm dosyalar tamamlandı · {n}/{n}": "Tutti i file completati · {n}/{n}",
+    "Transkriptlere kuyruk ekranından ulaşabilirsiniz": "Puoi raggiungere le trascrizioni dalla schermata della coda",
+    "Kuyruğa git": "Vai alla coda",
+    "← Geri": "← Indietro",
+    "{name} tamamlandı · sıradaki dosya başladı": "{name} completato · avviato il file successivo",
+    "{name} tamamlandı": "{name} completato",
+    "{name} dönüştürülemedi": "Impossibile trascrivere {name}",
+    "Kuyruk durduruldu. Çalışan dosya tamamlanınca durur.": "Coda fermata. Si fermerà al termine del file in corso.",
+    "Zaten kuyrukta": "Già in coda",
+    "Seçtiğiniz dosyalar listede var.": "I file scelti sono già nell'elenco.",
+    "Kuyruk dolu": "La coda è piena",
+    "Kuyruğa en fazla {n} dosya eklenebilir.": "La coda può contenere al massimo {n} file.",
+    "Yeni dosya seçilsin mi?": "Ricominciare con un nuovo file?",
+    "Kuyruk temizlenir; indirmediğiniz transkriptler kaybolur.": "La coda verrà svuotata e le trascrizioni non scaricate andranno perse.",
+    "Çalışan dönüştürme de durdurulur.": "Anche la trascrizione in corso verrà interrotta.",
+    "Evet, temizle": "Sì, svuota",
+    "Vazgeç": "Annulla",
+    "Üzerine yaz": "Sovrascrivi",
+    "Yeni sürüm var: {v}": "Nuova versione disponibile: {v}",
+}
+
+TRANSLATIONS = {"en": EN, "de": DE, "it": IT}
+
 
 def tr(text, **kw):
     """Arayüz metnini seçili dile çevirir; {alan} içeren metinlerde değerleri yerleştirir."""
-    out = EN.get(text, text) if LANG == "en" else text
+    out = TRANSLATIONS[LANG].get(text, text) if LANG in TRANSLATIONS else text
     return out.format(**kw) if kw else out
 
 
 def app_title():
-    return "Media - Text Converter" if LANG == "en" else "Medya - Text Dönüştürücü"
+    return {"en": "Media - Text Converter", "de": "Medien - Text-Konverter",
+            "it": "Media - Convertitore di testo"}.get(LANG, "Medya - Text Dönüştürücü")
 
 
 def app_tagline():
@@ -250,9 +566,22 @@ SPOKEN = [
 ]
 
 
+SPOKEN_DE_IT = {
+    "auto": ("Automatisch erkennen", "Rileva automaticamente"), "tr": ("Türkisch", "Turco"),
+    "en": ("Englisch", "Inglese"), "de": ("Deutsch", "Tedesco"), "fr": ("Französisch", "Francese"),
+    "es": ("Spanisch", "Spagnolo"), "it": ("Italienisch", "Italiano"), "pt": ("Portugiesisch", "Portoghese"),
+    "ru": ("Russisch", "Russo"), "ar": ("Arabisch", "Arabo"), "ja": ("Japanisch", "Giapponese"),
+    "ko": ("Koreanisch", "Coreano"), "zh": ("Chinesisch", "Cinese"), "nl": ("Niederländisch", "Olandese"),
+    "pl": ("Polnisch", "Polacco"), "uk": ("Ukrainisch", "Ucraino"), "fa": ("Persisch", "Persiano"),
+    "hi": ("Hindi", "Hindi"),
+}
+
+
 def spoken_label(key):
     for k, _, name_tr, name_en in SPOKEN:
         if k == key:
+            if LANG in ("de", "it"):
+                return SPOKEN_DE_IT[k][0 if LANG == "de" else 1]
             return name_en if LANG == "en" else name_tr
     return key
 
@@ -313,7 +642,8 @@ def save_config(cfg):
 
 
 def _units():
-    return ("sec", "min", "h") if LANG == "en" else ("sn", "dk", "sa")
+    return {"en": ("sec", "min", "h"), "de": ("Sek.", "Min.", "Std."), "it": ("sec", "min", "h")}.get(
+        LANG, ("sn", "dk", "sa"))
 
 
 def fmt_duration(seconds):
@@ -565,7 +895,7 @@ def render_error_icon(color, px=64):
 
 
 def render_flag(code, w=24, h=16):
-    """Türkiye ("tr") ve İngiltere ("en") bayrağı; köşeleri yuvarlatılmış küçük simge (2x çıktı)."""
+    """Türkiye, İngiltere, Almanya ve İtalya bayrağı; köşeleri yuvarlatılmış küçük simge (2x çıktı)."""
     S = 8
     W, H = w * S, h * S
     white, red_uk = (255, 255, 255), (200, 16, 46)
@@ -585,6 +915,12 @@ def render_flag(code, w=24, h=16):
             rad = sr if k % 2 == 0 else sr * 0.382
             star.append((sx + rad * math.cos(ang), cy + rad * math.sin(ang)))
         d.polygon(star, fill=white)
+    elif code == "de":
+        for i, col in enumerate(((0, 0, 0), (221, 0, 0), (255, 206, 0))):
+            d.rectangle([0, H * i / 3, W, H * (i + 1) / 3], fill=col)
+    elif code == "it":
+        for i, col in enumerate(((0, 146, 70), white, (206, 43, 55))):
+            d.rectangle([W * i / 3, 0, W * (i + 1) / 3, H], fill=col)
     else:
         blue = (1, 33, 105)
         d.rectangle([0, 0, W, H], fill=blue)
@@ -620,6 +956,10 @@ DANGER = {"light": "#C0392B", "dark": "#E5675A"}
 def fcount(n):
     if LANG == "en":
         return f"{n} file" if n == 1 else f"{n} files"
+    if LANG == "de":
+        return f"{n} Datei" if n == 1 else f"{n} Dateien"
+    if LANG == "it":
+        return f"{n} file"
     return f"{n} dosya"
 
 
@@ -866,10 +1206,10 @@ class QRow:
         self.btn_x = ctk.CTkButton(self.actions, text="✕", width=32, height=32, corner_radius=16, fg_color="transparent",
                                    hover_color=T("zone"), text_color=T("muted"), font=app.font(15),
                                    command=lambda: app._remove_job(job))
-        self.btn_view = ctk.CTkButton(self.actions, text=tr("Görüntüle"), width=96, height=32, corner_radius=16,
+        self.btn_view = ctk.CTkButton(self.actions, text=tr("Görüntüle"), width=app.bw(tr("Görüntüle"), 96, 12), height=32, corner_radius=16,
                                       fg_color=T("zone"), hover_color=T("line"), text_color=app.tone(),
                                       font=app.font(12, True), command=lambda: app.view_job(job))
-        self.btn_dl = ctk.CTkButton(self.actions, text=tr("İndir"), width=76, height=32, corner_radius=16,
+        self.btn_dl = ctk.CTkButton(self.actions, text=tr("İndir"), width=app.bw(tr("İndir"), 76, 12), height=32, corner_radius=16,
                                     fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
                                     text_color=T("on_accent"), font=app.font(12, True),
                                     command=lambda: app._download_job(job))
@@ -1280,7 +1620,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         global LANG
         self.cfg = load_config()
         LANG = self.cfg.get("ui_lang", "tr")
-        if LANG not in ("tr", "en"):
+        if LANG not in dict(LANGS):
             LANG = "tr"
         self.theme_mode = self.cfg.get("theme", "system")
         if self.theme_mode not in [m for m, _ in THEME_MODES]:
@@ -1443,7 +1783,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             font=self.font(13, True), command=self._toggle_theme_menu)
         flag = ctk.CTkImage(light_image=render_flag(LANG), dark_image=render_flag(LANG), size=(24, 16))
         self.lang_btn = ctk.CTkButton(
-            self.header, text=("English" if LANG == "en" else "Türkçe") + "  ▾", image=flag, compound="left",
+            self.header, text=dict(LANGS)[LANG] + "  ▾", image=flag, compound="left",
             width=122, height=36, corner_radius=18, fg_color=self.T("zone"), hover_color=self.T("line"),
             text_color=self.tone(), font=self.font(13, True), command=self._toggle_lang_menu)
         self._show_header_buttons(True)
@@ -1465,7 +1805,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def _open_lang_menu(self):
         pop = ctk.CTkFrame(self, fg_color=self.T("card"), border_width=1, border_color=self.T("line"),
                            corner_radius=16)
-        options = (("tr", "Türkçe"), ("en", "English"))
+        options = LANGS
         for i, (code, name) in enumerate(options):
             on = code == LANG
             base = self.TT("card", "accent", 0.18) if on else "transparent"
@@ -1644,14 +1984,22 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def _label(self, parent, text, size=14, bold=False, color="ink", **kw):
         return ctk.CTkLabel(parent, text=text, text_color=self.T(color), font=self.font(size, bold), **kw)
 
+    def bw(self, text, base, size=13):
+        """Düğme genişliği: en az base, uzun metinlerde yazıya göre büyür."""
+        return max(base, int(len(text) * size * 0.64) + 38)
+
+    def dd_w(self, base):
+        return base + 40 if LANG in ("de", "it") else base
+
     def _primary_button(self, parent, text, command, width=220):
-        return ctk.CTkButton(parent, text=text, command=command, width=width, height=48, corner_radius=24,
+        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width, 15), height=48,
+                             corner_radius=24,
                              fg_color=self.T("accent"), hover_color=self.TT("accent", "ink", 0.12),
                              text_color=self.T("on_accent"), text_color_disabled=self.T("on_accent"),
                              font=self.font(15, True))
 
     def _soft_button(self, parent, text, command, width=120, height=38):
-        return ctk.CTkButton(parent, text=text, command=command, width=width, height=height,
+        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width), height=height,
                              corner_radius=height // 2, fg_color=self.T("zone"), hover_color=self.T("line"),
                              text_color=self.tone(), font=self.font(13, True))
 
@@ -1904,7 +2252,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         row.pack(pady=(0, 14))
         self._label(row, tr("Çevirme Hızı"), 14, True).pack(side="left", padx=(0, 18))
         self.speed_dd = Dropdown(
-            self, row, 300, self.speed_items, lambda: self.speed, self._on_speed)
+            self, row, self.dd_w(300), self.speed_items, lambda: self.speed, self._on_speed)
         self.speed_dd.btn.pack(side="left")
 
         self.est_card = ctk.CTkFrame(page, fg_color=self.T("card"), border_width=1, border_color=self.T("line"),
@@ -2195,7 +2543,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.g_lang.on_click = lambda c: self.pick_global_spoken(c.frame)
         self.q_fmt = ctk.CTkFrame(st, fg_color="transparent")          # ilk transkript hazır olunca görünür
         self._label(self.q_fmt, tr("İndirme biçimi"), 13, True, color="muted").pack(side="left", padx=(0, 12))
-        self.q_fmt_dd = Dropdown(self, self.q_fmt, 240, self.format_items, lambda: self.fmt, self._on_format, up=True)
+        self.q_fmt_dd = Dropdown(self, self.q_fmt, self.dd_w(240), self.format_items, lambda: self.fmt, self._on_format, up=True)
         self.q_fmt_dd.btn.pack(side="left")
 
         head = ctk.CTkFrame(q, fg_color="transparent")
@@ -2269,8 +2617,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.q_all_var.set(bool(ready) and all(j.checked for j in ready))
         self.q_all.configure(state="normal" if ready and not running else "disabled")
         can = bool(picked) and not running
+        go_text = tr("Dönüştürülüyor…") if running else tr("Seçilenleri dönüştür ({n})", n=len(picked))
         self.q_go.configure(
-            text=tr("Dönüştürülüyor…") if running else tr("Seçilenleri dönüştür ({n})", n=len(picked)),
+            text=go_text, width=self.bw(go_text, 270, 15),
             state="normal" if can else "disabled", fg_color=self.T("accent") if can else self.T("line"),
             text_color=self.T("on_accent"), text_color_disabled=self.T("muted"))
         if running:
@@ -2647,7 +2996,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self._soft_button(bar, tr("Yeni dosya"), self._new_file, width=120, height=42).pack(side="left")
         self.dl_btn = self._primary_button(bar, tr("İndir"), self._download, width=200)
         self.dl_btn.pack(side="right")
-        self.fmt_dd = Dropdown(self, bar, 270, self.format_items, lambda: self.fmt, self._on_format, up=True)
+        self.fmt_dd = Dropdown(self, bar, self.dd_w(270), self.format_items, lambda: self.fmt, self._on_format, up=True)
         self.fmt_dd.btn.pack(side="right", padx=(12, 14))
         self._label(bar, tr("Dosya biçimi"), 14, True).pack(side="right")
         self._on_format(self.fmt)

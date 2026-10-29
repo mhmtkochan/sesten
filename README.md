@@ -17,7 +17,7 @@ Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da a
 - **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
 - Konuşma dili otomatik algılanır ya da elle seçilir (Türkçe dahil 17 dil).
 - **Yeni sürüm bildirimi:** Program açılışta GitHub'daki son sürüm numarasına bakar; daha yeni bir sürüm varsa ana ekranda "İndir" düğmeli bir uyarı çıkar. Kendiliğinden güncellenmez, kurulum dosyasını tarayıcıda siz indirirsiniz. Bağlantı yoksa sessizce atlanır. Kapatmak için `%APPDATA%\MedyaTextDonusturucu\config.json` dosyasına `"update_check": false` ekleyin.
-- **Türkçe ve İngilizce arayüz:** Ana ekranın sağ üstündeki dil butonuyla (bayraklı) değiştirilir. Varsayılan Türkçe'dir.
+- **Dört dilli arayüz (Türkçe, İngilizce, Almanca, İtalyanca):** Ana ekranın sağ üstündeki dil butonuyla (bayraklı) değiştirilir. Varsayılan Türkçe'dir.
 
 | Seçenekler | Sonuç |
 |---|---|
@@ -104,7 +104,7 @@ plain text or subtitles.
 
 ![English interface](docs/ekran-ingilizce.png)
 
-- The interface is available in **Turkish and English**. Use the language button (with a flag) at the top right of
+- The interface is available in **Turkish, English, German and Italian**. Use the language button (with a flag) at the top right of
   the main screen. Turkish is the default.
 - Download `MedyaTextKurulum.exe` from [Releases](../../releases) and run it. No administrator rights are needed.
   Requires 64-bit Windows 10 or 11.
