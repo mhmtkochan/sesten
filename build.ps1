@@ -36,7 +36,7 @@ if (-not $env:TCL_LIBRARY -and (Test-Path "$base\tcl\tcl8.6")) {
 
 Remove-Item dist, build -Recurse -Force -ErrorAction SilentlyContinue
 .\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name sesten `
-    --icon app.ico --add-data "app.ico;." `
+    --icon app.ico --add-data "app.ico;." --add-data "icons;icons" `
     --collect-all faster_whisper --collect-all ctranslate2 --collect-all onnxruntime `
     --collect-all tkinterdnd2 --collect-all customtkinter --collect-all av `
     --collect-all docx --collect-all fpdf --hidden-import tkinter app.py

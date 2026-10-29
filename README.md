@@ -1,5 +1,7 @@
 # sesten
 
+<p align="center"><img src="icons/mavi.png" width="112" alt="sesten logo"></p>
+
 **English** · [Türkçe](README.tr.md)
 
 A Windows program that turns audio and video files into text, **fully offline**. Drag your files in, pick a speed,
@@ -24,6 +26,8 @@ and download the transcript as Word, PDF, plain text or subtitles.
 - **Interface in four languages:** Turkish, English, German and Italian. Switch with the flag button at the top right
   of the home screen. Turkish is the default.
 - **Seven colours, light, dark or automatic theme:** Soft, Caramel, Honey, Sage, Ocean, Daffodil, Lavender.
+- **Seven program icons:** pick the icon in the Theme menu (Blue, Sky, Honey, Copper, Purple, Lemon, Green). The window,
+  the taskbar and your desktop and Start menu shortcuts follow your choice.
 - **New version notice:** on startup the program checks GitHub for a newer release and shows a small banner with a
   download button. Nothing is installed automatically. To turn this off, add `"update_check": false` to
   `%APPDATA%\sesten\config.json`.
@@ -34,9 +38,11 @@ and download the transcript as Word, PDF, plain text or subtitles.
 
 ![Queue with several files](docs/en/queue.png)
 
-| Language menu | Dark theme |
+| Language menu | Theme, color and icon menu |
 |---|---|
-| ![Language menu](docs/en/languages.png) | ![Dark theme](docs/en/dark.png) |
+| ![Language menu](docs/en/languages.png) | ![Theme menu](docs/en/theme.png) |
+
+![Dark theme](docs/en/dark.png)
 
 ## Installation (for users)
 
@@ -98,7 +104,7 @@ For a quick check without opening a window: `sesten.exe --selftest sound.wav res
 | `app.py` | The whole program (interface, transcription, file output) |
 | `build.ps1` | Script that builds the `.exe` and the installer (`-ExeOnly` builds only the `.exe`) |
 | `kurulum.iss` | Inno Setup installer script (Turkish and English installer) |
-| `app.ico` | Program icon |
+| `app.ico`, `icons/` | Program icon and the seven selectable icons (`.png` for the interface, `.ico` for windows and shortcuts) |
 
 ## License
 

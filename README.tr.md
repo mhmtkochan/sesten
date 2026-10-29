@@ -1,5 +1,7 @@
 # sesten
 
+<p align="center"><img src="icons/mavi.png" width="112" alt="sesten logo"></p>
+
 [English](README.md) · **Türkçe**
 
 Ses ve video dosyalarını **yazıya çeviren**, internete bağlanmadan çalışan bir Windows programı.
@@ -25,6 +27,8 @@ Dosyalarınızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya
 - **Dört dilli arayüz:** Türkçe, İngilizce, Almanca ve İtalyanca. Ana ekranın sağ üstündeki dil butonuyla (bayraklı)
   değiştirilir. Varsayılan Türkçe'dir.
 - **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
+- **Yedi program simgesi:** Simgeyi Tema menüsünden seçersiniz (Mavi, Gökyüzü, Bal, Bakır, Mor, Limon, Yeşil). Pencere,
+  görev çubuğu ve masaüstü ile Başlat menüsündeki kısayollarınız seçiminize uyar.
 - **Yeni sürüm bildirimi:** Program açılışta GitHub'daki son sürüme bakar; daha yeni bir sürüm varsa ana ekranda
   "İndir" düğmeli küçük bir şerit çıkar. Kendiliğinden güncellenmez. Kapatmak için
   `%APPDATA%\sesten\config.json` dosyasına `"update_check": false` ekleyin.
@@ -35,9 +39,11 @@ Dosyalarınızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya
 
 ![Birden fazla dosya kuyruğu](docs/tr/queue.png)
 
-| Dil menüsü | Koyu tema |
+| Dil menüsü | Tema, renk ve simge menüsü |
 |---|---|
-| ![Dil menüsü](docs/tr/languages.png) | ![Koyu tema](docs/tr/dark.png) |
+| ![Dil menüsü](docs/tr/languages.png) | ![Tema menüsü](docs/tr/theme.png) |
+
+![Koyu tema](docs/tr/dark.png)
 
 ## Kurulum (kullanıcılar için)
 
@@ -99,7 +105,7 @@ Pencere açmadan hızlı bir deneme için: `sesten.exe --selftest ses.wav sonuc.
 | `app.py` | Programın tamamı (arayüz, çeviri, dosya çıktıları) |
 | `build.ps1` | `.exe` ve kurulum dosyasını derleyen betik (`-ExeOnly` yalnızca `.exe` üretir) |
 | `kurulum.iss` | Inno Setup kurulum betiği (Türkçe ve İngilizce kurulum) |
-| `app.ico` | Program simgesi |
+| `app.ico`, `icons/` | Program simgesi ve seçilebilen yedi simge (arayüz için `.png`, pencere ve kısayollar için `.ico`) |
 
 ## Lisans
 

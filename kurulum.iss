@@ -48,6 +48,10 @@ Type: files; Name: "{autoprograms}\Medya - Text Dönüştürücü.lnk"
 Type: files; Name: "{autodesktop}\Medya - Text Dönüştürücü.lnk"
 Type: filesandordirs; Name: "{autopf}\MedyaText"
 
+; Kullanıcının seçtiği simge kısayollar için buraya kopyalanır; kaldırırken silinir (ayarlar kalır).
+[UninstallDelete]
+Type: filesandordirs; Name: "{userappdata}\sesten\icons"
+
 [Files]
 Source: "dist\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
 

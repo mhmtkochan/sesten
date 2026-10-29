@@ -1,4 +1,5 @@
 """sesten: ses ve videoları yazıya çeviren, tamamen çevrimdışı çalışan masaüstü uygulaması."""
+import ctypes
 import json
 import math
 import mimetypes
@@ -44,6 +45,8 @@ EN = {
     "Otomatik": "Automatic", "Açık": "Light", "Koyu": "Dark",
     "Yumuşak": "Soft", "Karamel": "Caramel", "Bal": "Honey", "Adaçayı": "Sage",
     "Okyanus": "Ocean", "Nergis": "Daffodil", "Lavanta": "Lavender",
+    "SİMGE": "ICON", "Mavi": "Blue", "Gökyüzü": "Sky", "Bakır": "Copper", "Mor": "Purple",
+    "Limon": "Lemon", "Yeşil": "Green",
     # giriş ekranı
     "Ses veya video dosyasının bağlantısını yapıştırın": "Paste a link to an audio or video file",
     "Yükle": "Load",
@@ -214,6 +217,13 @@ DE = {
     "Okyanus": "Ozean",
     "Nergis": "Narzisse",
     "Lavanta": "Lavendel",
+    "SİMGE": "SYMBOL",
+    "Mavi": "Blau",
+    "Gökyüzü": "Himmel",
+    "Bakır": "Kupfer",
+    "Mor": "Lila",
+    "Limon": "Zitrone",
+    "Yeşil": "Grün",
     "Ses veya video dosyasının bağlantısını yapıştırın": "Link zu einer Audio- oder Videodatei einfügen",
     "Yükle": "Laden",
     "veya": "oder",
@@ -370,6 +380,13 @@ IT = {
     "Okyanus": "Oceano",
     "Nergis": "Narciso",
     "Lavanta": "Lavanda",
+    "SİMGE": "ICONA",
+    "Mavi": "Blu",
+    "Gökyüzü": "Cielo",
+    "Bakır": "Rame",
+    "Mor": "Viola",
+    "Limon": "Limone",
+    "Yeşil": "Verde",
     "Ses veya video dosyasının bağlantısını yapıştırın": "Incolla il link a un file audio o video",
     "Yükle": "Carica",
     "veya": "oppure",
@@ -876,22 +893,104 @@ def render_zone(w, h, pal, highlight=False):
     return img.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
 
 
-def render_logo(accent, on_accent, px=84):
-    S = 4
-    N = px * S
-    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle([0, 0, N - 1, N - 1], radius=int(N * 13 / 42), fill=_hex(accent))
-    u = N / 42
-    off = (N - 24 * u) / 2
-    wd = 2.4 * u
-    col = _hex(on_accent)
-    for x, y1, y2 in [(3.5, 10, 14), (8, 6.5, 17.5), (12.5, 3.5, 20.5), (17, 7.5, 16.5), (21, 10.5, 13.5)]:
-        X, ya, yb = off + x * u, off + y1 * u, off + y2 * u
-        d.line([(X, ya), (X, yb)], fill=col, width=int(wd))
-        for Y in (ya, yb):
-            d.ellipse([X - wd / 2, Y - wd / 2, X + wd / 2, Y + wd / 2], fill=col)
+# Program simgeleri: icons/<anahtar>.png (arayüzde) ve .ico (pencere, kısayollar). Varsayılan mavi, .exe'nin simgesi de odur.
+ICON_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / "icons"
+APP_ICONS = [("mavi", "Mavi"), ("gok", "Gökyüzü"), ("bal", "Bal"), ("bakir", "Bakır"),
+             ("mor", "Mor"), ("limon", "Limon"), ("yesil", "Yeşil")]
+DEFAULT_ICON = "mavi"
+
+
+def load_app_icon(key, px):
+    img = Image.open(ICON_DIR / f"{key}.png").convert("RGBA")
     return img.resize((px, px), Image.Resampling.LANCZOS)
+
+
+class _GUID(ctypes.Structure):
+    _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
+
+
+def _guid(text):
+    g = _GUID()
+    ctypes.OleDLL("ole32").CLSIDFromString(text, ctypes.byref(g))
+    return g
+
+
+def _vcall(obj, index, argtypes, *args, restype=ctypes.HRESULT):
+    """COM nesnesinin sanal tablosundaki index. yöntemini çağırır (pywin32 olmadan)."""
+    vtbl = ctypes.cast(obj, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))[0]
+    return ctypes.WINFUNCTYPE(restype, ctypes.c_void_p, *argtypes)(vtbl[index])(obj, *args)
+
+
+def _shell_folder(csidl):
+    buf = ctypes.create_unicode_buffer(520)
+    return buf.value if ctypes.windll.shell32.SHGetFolderPathW(None, csidl, None, 0, buf) == 0 else ""
+
+
+def _retarget_shortcuts(folders, exe, icon):
+    """folders içindeki, exe'ye giden .lnk kısayollarının simgesini icon yapar. Değiştirilen sayısını döndürür."""
+    ole32 = ctypes.OleDLL("ole32")
+    clsid = _guid("{00021401-0000-0000-C000-000000000046}")        # ShellLink
+    iid_link = _guid("{000214F9-0000-0000-C000-000000000046}")     # IShellLinkW
+    iid_file = _guid("{0000010B-0000-0000-C000-000000000046}")     # IPersistFile
+    want, changed = os.path.normcase(os.path.realpath(exe)), 0
+    for folder in folders:
+        if not folder or not os.path.isdir(folder):
+            continue
+        for entry in os.scandir(folder):
+            if not entry.name.lower().endswith(".lnk"):
+                continue
+            link, pf = ctypes.c_void_p(), ctypes.c_void_p()
+            try:
+                ole32.CoCreateInstance(ctypes.byref(clsid), None, 1, ctypes.byref(iid_link), ctypes.byref(link))
+                _vcall(link, 0, [ctypes.c_void_p, ctypes.c_void_p], ctypes.byref(iid_file), ctypes.byref(pf))
+                _vcall(pf, 5, [ctypes.c_wchar_p, ctypes.c_ulong], entry.path, 2)         # Load, okuma+yazma
+                target = ctypes.create_unicode_buffer(1024)
+                _vcall(link, 3, [ctypes.c_wchar_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_ulong],
+                       target, 1024, None, 0)
+                if not target.value or os.path.normcase(os.path.realpath(target.value)) != want:
+                    continue
+                cur, idx = ctypes.create_unicode_buffer(1024), ctypes.c_int()
+                _vcall(link, 16, [ctypes.c_wchar_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int)],
+                       cur, 1024, ctypes.byref(idx))
+                if os.path.normcase(cur.value) == os.path.normcase(icon) and idx.value == 0:
+                    continue
+                _vcall(link, 17, [ctypes.c_wchar_p, ctypes.c_int], icon, 0)               # SetIconLocation
+                _vcall(pf, 6, [ctypes.c_wchar_p, ctypes.c_int], None, 1)                  # Save
+                changed += 1
+            except OSError:
+                pass
+            finally:
+                for p in (pf, link):
+                    if p.value:
+                        _vcall(p, 2, [], restype=ctypes.c_ulong)                          # Release
+    return changed
+
+
+def sync_shortcut_icons(key):
+    """Masaüstü, Başlat menüsü ve görev çubuğundaki sesten kısayollarının simgesini seçilen simgeye çevirir.
+    Yalnızca kurulu .exe olarak çalışırken ve yalnızca bu programa giden kısayollara dokunur; hata olursa sessiz."""
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        if key == DEFAULT_ICON:
+            icon = sys.executable
+        else:
+            dst = CONFIG_PATH.parent / "icons"
+            dst.mkdir(parents=True, exist_ok=True)
+            icon = str(dst / f"{key}.ico")
+            shutil.copyfile(ICON_DIR / f"{key}.ico", icon)
+        folders = [_shell_folder(0x10), _shell_folder(0x02),                                  # masaüstü, Başlat menüsü
+                   os.path.join(_shell_folder(0x1A), "Microsoft", "Internet Explorer", "Quick Launch",
+                                "User Pinned", "TaskBar")]
+        ole32 = ctypes.OleDLL("ole32")
+        try:
+            ole32.CoInitializeEx(None, 2)
+        except OSError:
+            pass
+        if _retarget_shortcuts(folders, sys.executable, icon):
+            ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x1000, None, None)             # simge önbelleğini yenile
+    except Exception:
+        pass
 
 
 def render_error_icon(color, px=64):
@@ -1628,7 +1727,7 @@ class ErrorDialog(ctk.CTkToplevel):
             pass
 
     def _icon(self):
-        ico = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / "app.ico"
+        ico = ICON_DIR / f"{self.app.icon_key}.ico"
         try:
             if ico.exists():
                 self.iconbitmap(str(ico))
@@ -1663,6 +1762,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.color = self.cfg.get("color", "yumusak")
         if self.color not in COLORS:
             self.color = "yumusak"
+        self.icon_key = self.cfg.get("icon", DEFAULT_ICON)
+        if self.icon_key not in dict(APP_ICONS):
+            self.icon_key = DEFAULT_ICON
         ctk.set_appearance_mode(self.theme_mode)
 
         self.title(app_title())
@@ -1731,6 +1833,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.cfg.get("update_check", True):
             self.after(2500, lambda: UpdateChecker(self.msg_queue).start())
         self.after(300, self._set_icon)         # CTk kendi simgesini 200 ms sonra koyar, ondan sonra değiştiriyoruz
+        if self.icon_key != DEFAULT_ICON:       # güncelleme kurulumu kısayolları sıfırlamış olabilir
+            threading.Thread(target=sync_shortcut_icons, args=(self.icon_key,), daemon=True).start()
 
     def show_error(self, message):
         if self.error_dialog is not None:
@@ -1753,7 +1857,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.destroy()
 
     def _set_icon(self):
-        ico = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / "app.ico"
+        ico = ICON_DIR / f"{self.icon_key}.ico"
         try:
             if ico.exists():
                 self.iconbitmap(str(ico))
@@ -1798,8 +1902,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.header.pack(fill="x", padx=40, pady=(22, 12), **kw)
 
         pal_l, pal_d = self.pal("light"), self.pal("dark")
-        logo = ctk.CTkImage(light_image=render_logo(pal_l["accent"], pal_l["on_accent"]),
-                            dark_image=render_logo(pal_d["accent"], pal_d["on_accent"]), size=(42, 42))
+        mark = load_app_icon(self.icon_key, 128)
+        logo = ctk.CTkImage(light_image=mark, dark_image=mark, size=(42, 42))
         brand = ctk.CTkFrame(self.header, fg_color="transparent")
         brand.pack(side="left")
         ctk.CTkLabel(brand, image=logo, text="").pack(side="left")
@@ -1910,6 +2014,20 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                               border_color=self.T("accent") if on else self.T("zone"),
                               command=lambda k=key: self.after(10, lambda: self._set_color(k)))
             b.grid(row=i // 4, column=i % 4, padx=3, pady=3)
+
+        ctk.CTkLabel(inner, text=tr("SİMGE"), text_color=self.T("muted"), font=self.font(11, True),
+                     anchor="w").pack(fill="x", pady=(14, 6))
+        icons = ctk.CTkFrame(inner, fg_color="transparent")
+        icons.pack(fill="x")
+        for i, (key, label) in enumerate(APP_ICONS):
+            on = key == self.icon_key
+            img = ctk.CTkImage(light_image=load_app_icon(key, 96), dark_image=load_app_icon(key, 96), size=(32, 32))
+            b = ctk.CTkButton(icons, text=tr(label), image=img, compound="top", width=82, height=66, corner_radius=12,
+                              fg_color=self.T("zone"), hover_color=self.T("line"), text_color=self.T("ink"),
+                              font=self.font(12), border_width=2,
+                              border_color=self.T("accent") if on else self.T("zone"),
+                              command=lambda k=key: self.after(10, lambda: self._set_app_icon(k)))
+            b.grid(row=i // 4, column=i % 4, padx=3, pady=3)
         pop.update_idletasks()
         x = self.lg(self.winfo_width()) - 40 - self.lg(pop.winfo_reqwidth())
         pop.place(x=x, y=68)
@@ -1933,6 +2051,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self._zone_cache.clear()
         self._build_header()
         self.show_home()
+        self.after(60, self._open_theme_menu)
+
+    def _set_app_icon(self, key):
+        self.icon_key = key
+        self.cfg["icon"] = key
+        save_config(self.cfg)
+        self.close_overlay()
+        self._set_icon()
+        self._build_header()
+        threading.Thread(target=sync_shortcut_icons, args=(key,), daemon=True).start()
         self.after(60, self._open_theme_menu)
 
     # ------------------------------------------------------------ açılır pencereler / bildirimler
