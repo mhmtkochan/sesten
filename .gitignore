@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Derleme çıktıları
+build/
+dist/
+*.spec
+MedyaText.exe
+MedyaTextKurulum.exe
+
+# Geçici ve yerel dosyalar
+*.log
+config.json
+.vscode/
+.idea/
+Thumbs.db
