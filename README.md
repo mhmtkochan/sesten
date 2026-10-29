@@ -15,6 +15,7 @@ Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da a
 - **Doğrudan dosya bağlantısı** yapıştırarak çeviri (örneğin `.mp3` ya da `.mp4` ile biten adresler).
 - **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
 - Konuşma dili otomatik algılanır ya da elle seçilir (Türkçe dahil 17 dil).
+- **Türkçe ve İngilizce arayüz:** Ana ekranın sağ üstündeki dil butonuyla (bayraklı) değiştirilir. Varsayılan Türkçe'dir.
 
 | Seçenekler | Sonuç |
 |---|---|
@@ -88,3 +89,26 @@ Pencere açmadan hızlı bir deneme için: `MedyaText.exe --selftest ses.wav son
 Bu projenin kodu [MIT lisansı](LICENSE) ile yayınlanmıştır.
 Kullanılan açık kaynak bileşenler ve lisansları için [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) dosyasına bakın.
 Kurulum dosyası, GPL lisanslı bileşenler (FFmpeg içindeki x264 ve x265) içerir; ayrıntılar orada.
+
+---
+
+## English
+
+**Media - Text Converter** (Turkish name: *Medya - Text Dönüştürücü*) is a Windows program that turns audio and
+video files into text, **fully offline**. Drag a file in, pick a speed, and download the transcript as Word, PDF,
+plain text or subtitles.
+
+![English interface](docs/ekran-ingilizce.png)
+
+- The interface is available in **Turkish and English**. Use the language button (with a flag) at the top right of
+  the main screen. Turkish is the default.
+- Download `MedyaTextKurulum.exe` from [Releases](../../releases) and run it. No administrator rights are needed.
+  Requires 64-bit Windows 10 or 11.
+- On first use, extra files (about 500 MB to 3 GB depending on the chosen speed) are downloaded once. After that
+  the program works offline.
+- Limits: one file at a time; links must point directly to an audio or video file (page links from video sites are
+  not supported); Windows only.
+- Windows may show a "Windows protected your PC" warning because the program is unsigned. Click "More info", then
+  "Run anyway".
+- The source code is MIT licensed. The installer includes GPL-licensed components (x264 and x265 inside FFmpeg),
+  see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

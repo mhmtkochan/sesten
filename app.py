@@ -27,16 +27,136 @@ from PIL import Image, ImageDraw
 from tkinter import filedialog, messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-APP_TITLE = "Medya - Text Dönüştürücü"
-APP_TAGLINE = "Ses ve videodan yazıya"
+LANG = "tr"          # arayüz dili: "tr" (varsayılan) ya da "en"
+
+# Türkçe metin anahtar, İngilizce karşılığı değer. İngilizce seçilince metin buradan bulunur.
+EN = {
+    # üst bar, tema
+    "Ses ve videodan yazıya": "Audio and video to text",
+    "Tema": "Theme", "TEMA": "THEME", "RENK": "COLOR",
+    "Otomatik": "Automatic", "Açık": "Light", "Koyu": "Dark",
+    "Yumuşak": "Soft", "Karamel": "Caramel", "Bal": "Honey", "Adaçayı": "Sage",
+    "Okyanus": "Ocean", "Nergis": "Daffodil", "Lavanta": "Lavender",
+    # giriş ekranı
+    "Ses veya video dosyasının bağlantısını yapıştırın": "Paste a link to an audio or video file",
+    "Yükle": "Load",
+    "veya": "or",
+    "Dosyayı buraya sürükleyebilirsiniz": "You can drag the file here",
+    "ya da buraya tıklayıp seçebilirsiniz": "or click here to choose it",
+    "MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası": "MP3 · WAV · M4A · MP4 · MKV · MOV and more",
+    "Ses veya video dosyası seç": "Choose an audio or video file",
+    "Ses ve video dosyaları": "Audio and video files",
+    "Tüm dosyalar": "All files",
+    "Birden fazla dosya seçildi": "More than one file selected",
+    "Aynı anda yalnızca bir dosya yükleyebilirsiniz. Lütfen tek bir dosya seçin.":
+        "You can only load one file at a time. Please choose a single file.",
+    "Klasör seçildi": "Folder selected",
+    "Lütfen klasör yerine tek bir ses veya video dosyası seçin.":
+        "Please choose a single audio or video file instead of a folder.",
+    "Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından kullanılmadığından emin olun.":
+        "This file could not be opened.\n\nMake sure the file is in place and not in use by another program.",
+    "Bağlantı girilmedi": "No link entered",
+    "Lütfen bir ses veya video dosyasının bağlantısını yapıştırın.": "Please paste a link to an audio or video file.",
+    "Geçersiz bağlantı": "Invalid link",
+    "Bağlantı http:// veya https:// ile başlamalıdır.": "The link must start with http:// or https://.",
+    "Bağlantı kontrol ediliyor…": "Checking the link…",
+    # bağlantı indirme hataları
+    "Sunucu dosyayı vermedi (hata kodu {code}).\n\nBağlantının herkese açık ve doğru olduğundan emin olun.":
+        "The server did not provide the file (error code {code}).\n\nMake sure the link is public and correct.",
+    "Bağlantıya ulaşılamadı.\n\nİnternet bağlantınızı ve adresi kontrol edin.\n\n({err})":
+        "The link could not be reached.\n\nCheck your internet connection and the address.\n\n({err})",
+    "Dosya alınamadı.\n\n({err})": "The file could not be fetched.\n\n({err})",
+    "Bu bağlantı bir ses veya video dosyası değil, bir web sayfası.\n\nYalnızca doğrudan dosya bağlantıları desteklenir (örneğin .mp3 veya .mp4 ile biten adresler). Video sitelerindeki sayfa bağlantıları desteklenmez. Dosyanız bilgisayarınızda varsa doğrudan ana ekrandaki alana sürükleyebilirsiniz.":
+        "This link is not an audio or video file, it is a web page.\n\nOnly direct file links are supported (for example addresses ending in .mp3 or .mp4). Page links from video sites are not supported. If you have the file on your computer, you can drag it into the area on the main screen.",
+    "Bağlantıdan veri gelmedi. Adresi kontrol edin.": "No data came from the link. Check the address.",
+    "dosya": "file",
+    # seçenekler
+    "Süre: {dur}": "Duration: {dur}",
+    "süre okunamadı": "duration unavailable",
+    "Değiştir": "Change",
+    "Çevirme Hızı": "Transcription speed",
+    "Tahmini süre": "Estimated time",
+    "Konuşma dili": "Spoken language",
+    "Transkripti başlat": "Start transcription",
+    "Hızlı": "Fast", "Dengeli": "Balanced", "Güvenli": "Accurate",
+    "Dosyaya göre en uygununu seçer": "Picks the best option for your file",
+    "En hızlı, günlük kayıtlar için": "Fastest, good for everyday recordings",
+    "Hız ve doğruluk bir arada": "Speed and accuracy together",
+    "En yüksek doğruluk, daha yavaş": "Highest accuracy, slower",
+    "Otomatik: {title} seçildi": "Automatic: {title} selected",
+    "İlk kullanımda ek dosyalar indirilir (yaklaşık {size}, internet gerekir)":
+        "Extra files (about {size}) are downloaded on first use. Internet required.",
+    "~1,6 GB": "~1.6 GB",
+    "~1 dk'dan az": "under 1 min",
+    # ilerleme
+    "Hazırlanıyor…": "Preparing…",
+    "İptal": "Cancel",
+    "İptal ediliyor…": "Cancelling…",
+    "İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet bağlantısı gerekir.":
+        "Downloading the files needed for first use…\nThis happens only once and needs an internet connection.",
+    "Dönüştürme işlemi hazırlanıyor…": "Getting the transcription ready…",
+    "Dosya indiriliyor…": "Downloading the file…",
+    "Hesaplanıyor…": "Calculating…",
+    "Tahmini kalan süre: {t}": "Estimated time left: {t}",
+    "Transkript çıkarılamadı.\n\n{err}": "The transcript could not be created.\n\n{err}",
+    # sonuç
+    "Transkript hazır": "Transcript ready",
+    "{t} sürdü": "took {t}",
+    "Düz metin": "Plain text",
+    "Zaman damgalı": "With timestamps",
+    "(Konuşma bulunamadı)": "(No speech found)",
+    "İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.":
+        "Showing the first {n} lines (of {total}). The downloaded file contains everything.",
+    "Yeni dosya": "New file",
+    "İndir": "Download",
+    "Dosya biçimi": "File format",
+    "Kopyala": "Copy",
+    "Kopyalandı ✓": "Copied ✓",
+    "Bir metin seçin": "Select a text",
+    "2 dosyayı indir": "Download 2 files",
+    "Sadece zaman damgalı seçildi (altyazı biçimi)": "Only timestamped selected (subtitle format)",
+    "İkisi de seçildi": "Both selected",
+    "Sadece düz metin seçildi": "Only plain text selected",
+    "Sadece zaman damgalı seçildi": "Only timestamped selected",
+    "İndirmek istediklerinizi işaretleyin": "Tick what you want to download",
+    "Word belgesi": "Word document",
+    "Metin dosyası": "Text file",
+    "Altyazı": "Subtitles",
+    "Düzenlemek için en uygunu": "Best for editing",
+    "Paylaşmak ve yazdırmak için": "For sharing and printing",
+    "En sade, her cihazda açılır": "Plainest, opens anywhere",
+    "Videoya altyazı eklemek için": "For adding subtitles to a video",
+    "{stem} (zaman damgalı)": "{stem} (timestamped)",
+    "Kaydet": "Save",
+    "Dosyaların kaydedileceği klasörü seçin": "Choose a folder to save the files in",
+    "Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}": "These files already exist. Overwrite them?\n\n{files}",
+    "Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({err})":
+        "The file could not be saved.\n\nCould not write to the chosen location. Try another folder.\n({err})",
+    "Dosya indirme işlemi tamamlandı.": "File download complete.",
+    "Tamam": "OK",
+}
+
+
+def tr(text, **kw):
+    """Arayüz metnini seçili dile çevirir; {alan} içeren metinlerde değerleri yerleştirir."""
+    out = EN.get(text, text) if LANG == "en" else text
+    return out.format(**kw) if kw else out
+
+
+def app_title():
+    return "Media - Text Converter" if LANG == "en" else "Medya - Text Dönüştürücü"
+
+
+def app_tagline():
+    return tr("Ses ve videodan yazıya")
 CONFIG_PATH = Path(os.environ.get("APPDATA", Path.home())) / "MedyaTextDonusturucu" / "config.json"
 FONT = "Segoe UI"
 
-MEDIA_TYPES = [
-    ("Ses ve video dosyaları",
-     "*.mp3 *.wav *.m4a *.aac *.ogg *.opus *.flac *.wma *.mp4 *.mkv *.mov *.avi *.webm *.wmv *.flv *.m4v *.3gp"),
-    ("Tüm dosyalar", "*.*"),
-]
+_MEDIA_PATTERN = "*.mp3 *.wav *.m4a *.aac *.ogg *.opus *.flac *.wma *.mp4 *.mkv *.mov *.avi *.webm *.wmv *.flv *.m4v *.3gp"
+
+
+def media_types():
+    return [(tr("Ses ve video dosyaları"), _MEDIA_PATTERN), (tr("Tüm dosyalar"), "*.*")]
 
 # key: (başlık, whisper modeli, beam, tahmini işlem süresi / ses süresi (işlemci), indirme boyutu)
 MODELS = {
@@ -57,12 +177,26 @@ FORMATS = {
     "srt": ("Altyazı", ".srt", "Videoya altyazı eklemek için"),
 }
 
-LANGUAGES = {
-    "Otomatik algıla": None, "Türkçe": "tr", "İngilizce": "en", "Almanca": "de", "Fransızca": "fr",
-    "İspanyolca": "es", "İtalyanca": "it", "Portekizce": "pt", "Rusça": "ru", "Arapça": "ar",
-    "Japonca": "ja", "Korece": "ko", "Çince": "zh", "Hollandaca": "nl", "Lehçe": "pl",
-    "Ukraynaca": "uk", "Farsça": "fa", "Hintçe": "hi",
-}
+SPOKEN = [
+    ("auto", None, "Otomatik algıla", "Auto-detect"), ("tr", "tr", "Türkçe", "Turkish"),
+    ("en", "en", "İngilizce", "English"), ("de", "de", "Almanca", "German"), ("fr", "fr", "Fransızca", "French"),
+    ("es", "es", "İspanyolca", "Spanish"), ("it", "it", "İtalyanca", "Italian"), ("pt", "pt", "Portekizce", "Portuguese"),
+    ("ru", "ru", "Rusça", "Russian"), ("ar", "ar", "Arapça", "Arabic"), ("ja", "ja", "Japonca", "Japanese"),
+    ("ko", "ko", "Korece", "Korean"), ("zh", "zh", "Çince", "Chinese"), ("nl", "nl", "Hollandaca", "Dutch"),
+    ("pl", "pl", "Lehçe", "Polish"), ("uk", "uk", "Ukraynaca", "Ukrainian"), ("fa", "fa", "Farsça", "Persian"),
+    ("hi", "hi", "Hintçe", "Hindi"),
+]
+
+
+def spoken_label(key):
+    for k, _, name_tr, name_en in SPOKEN:
+        if k == key:
+            return name_en if LANG == "en" else name_tr
+    return key
+
+
+def spoken_code(key):
+    return next((code for k, code, _, _ in SPOKEN if k == key), None)
 
 PREVIEW_LINES = 3000         # ekranda gösterilecek en fazla satır; ölçümde 3000 satır bile 0,3 sn'den kısa sürdü
 
@@ -103,7 +237,7 @@ COLORS = {
 # ---------------------------------------------------------------- yardımcılar
 def load_config():
     try:
-        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        return json.loads(CONFIG_PATH.read_text(encoding="utf-8-sig"))     # BOM'lu dosyayı da okur
     except Exception:
         return {}
 
@@ -116,25 +250,31 @@ def save_config(cfg):
         pass
 
 
+def _units():
+    return ("sec", "min", "h") if LANG == "en" else ("sn", "dk", "sa")
+
+
 def fmt_duration(seconds):
+    sec_u, min_u, hour_u = _units()
     seconds = max(0, int(round(seconds)))
     if seconds < 60:
-        return f"{seconds} sn"
+        return f"{seconds} {sec_u}"
     m, s = divmod(seconds, 60)
     if m < 60:
-        return f"{m} dk {s:02d} sn" if s else f"{m} dk"
+        return f"{m} {min_u} {s:02d} {sec_u}" if s else f"{m} {min_u}"
     h, m = divmod(m, 60)
-    return f"{h} sa {m:02d} dk"
+    return f"{h} {hour_u} {m:02d} {min_u}"
 
 
 def fmt_estimate(seconds):
+    _, min_u, hour_u = _units()
     if seconds < 45:
-        return "~1 dk'dan az"
+        return tr("~1 dk'dan az")
     minutes = max(1, round(seconds / 60))
     if minutes < 60:
-        return f"~{minutes} dk"
+        return f"~{minutes} {min_u}"
     h, m = divmod(minutes, 60)
-    return f"~{h} sa {m:02d} dk"
+    return f"~{h} {hour_u} {m:02d} {min_u}"
 
 
 def fmt_clock(t, srt=False):
@@ -362,6 +502,45 @@ def render_error_icon(color, px=64):
     return img.resize((px, px), Image.Resampling.LANCZOS)
 
 
+def render_flag(code, w=24, h=16):
+    """Türkiye ("tr") ve İngiltere ("en") bayrağı; köşeleri yuvarlatılmış küçük simge (2x çıktı)."""
+    S = 8
+    W, H = w * S, h * S
+    white, red_uk = (255, 255, 255), (200, 16, 46)
+    img = Image.new("RGB", (W, H), white)
+    d = ImageDraw.Draw(img)
+    if code == "tr":
+        red = (227, 10, 23)
+        d.rectangle([0, 0, W, H], fill=red)
+        cx, cy, r1 = H * 0.5, H * 0.5, H * 0.25                      # hilal: büyük beyaz daire, içinde kırmızı daire
+        d.ellipse([cx - r1, cy - r1, cx + r1, cy + r1], fill=white)
+        r2, cx2 = H * 0.2, cx + H * 0.0625
+        d.ellipse([cx2 - r2, cy - r2, cx2 + r2, cy + r2], fill=red)
+        sx, sr = H * 0.84, H * 0.125                                 # yıldız (bir ucu sola bakar)
+        star = []
+        for k in range(10):
+            ang = math.pi + k * math.pi / 5
+            rad = sr if k % 2 == 0 else sr * 0.382
+            star.append((sx + rad * math.cos(ang), cy + rad * math.sin(ang)))
+        d.polygon(star, fill=white)
+    else:
+        blue = (1, 33, 105)
+        d.rectangle([0, 0, W, H], fill=blue)
+        for a, b in (((0, 0), (W, H)), ((0, H), (W, 0))):
+            d.line([a, b], fill=white, width=int(H * 0.2))
+            d.line([a, b], fill=red_uk, width=int(H * 0.07))
+        d.rectangle([W / 2 - H * 0.17, 0, W / 2 + H * 0.17, H], fill=white)
+        d.rectangle([0, H / 2 - H * 0.17, W, H / 2 + H * 0.17], fill=white)
+        d.rectangle([W / 2 - H * 0.1, 0, W / 2 + H * 0.1, H], fill=red_uk)
+        d.rectangle([0, H / 2 - H * 0.1, W, H / 2 + H * 0.1], fill=red_uk)
+    mask = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, W - 1, H - 1], radius=3 * S, fill=255)
+    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    out.paste(img, (0, 0), mask)
+    ImageDraw.Draw(out).rounded_rectangle([0, 0, W - 1, H - 1], radius=3 * S, outline=(0, 0, 0, 46), width=S // 2)
+    return out.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
+
+
 def render_dot(color, px=28):
     S = 4
     img = Image.new("RGBA", (px * S, px * S), (0, 0, 0, 0))
@@ -425,7 +604,7 @@ class LinkWorker(threading.Thread):
     def _clean_name(name):
         name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", urllib.parse.unquote(name)).strip(". ")
         stem, ext = os.path.splitext(name)
-        return (stem[:90] or "dosya") + ext
+        return (stem[:90] or tr("dosya")) + ext
 
     def run(self):
         try:
@@ -433,16 +612,16 @@ class LinkWorker(threading.Thread):
         except LinkError as exc:
             self.q.put(("dl_error", str(exc)))
         except urllib.error.HTTPError as exc:
-            self.q.put(("dl_error", f"Sunucu dosyayı vermedi (hata kodu {exc.code}).\n\n"
-                                    "Bağlantının herkese açık ve doğru olduğundan emin olun."))
+            self.q.put(("dl_error", tr("Sunucu dosyayı vermedi (hata kodu {code}).\n\n"
+                                       "Bağlantının herkese açık ve doğru olduğundan emin olun.", code=exc.code)))
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             if self.cancel.is_set():
                 self.q.put(("dl_cancelled",))
             else:
-                self.q.put(("dl_error", "Bağlantıya ulaşılamadı.\n\nİnternet bağlantınızı ve adresi kontrol edin.\n\n"
-                                        f"({type(exc).__name__})"))
+                self.q.put(("dl_error", tr("Bağlantıya ulaşılamadı.\n\nİnternet bağlantınızı ve adresi kontrol edin.\n\n"
+                                           "({err})", err=type(exc).__name__)))
         except Exception as exc:  # noqa: BLE001
-            self.q.put(("dl_error", f"Dosya alınamadı.\n\n({type(exc).__name__}: {exc})"))
+            self.q.put(("dl_error", tr("Dosya alınamadı.\n\n({err})", err=f"{type(exc).__name__}: {exc}")))
 
     def _download(self):
         req = urllib.request.Request(self.url, headers={
@@ -453,11 +632,12 @@ class LinkWorker(threading.Thread):
             ext = os.path.splitext(fname)[1].lower()
             is_media = ctype.startswith(("audio/", "video/")) or ext in MEDIA_EXTS
             if ctype in ("text/html", "application/xhtml+xml") or not is_media:
-                raise LinkError("Bu bağlantı bir ses veya video dosyası değil, bir web sayfası.\n\n"
-                                "Yalnızca doğrudan dosya bağlantıları desteklenir (örneğin .mp3 veya .mp4 ile biten "
-                                "adresler). Video sitelerindeki sayfa bağlantıları desteklenmez. Dosyanız bilgisayarınızda "
-                                "varsa doğrudan ana ekrandaki alana sürükleyebilirsiniz.")
-            name = self._clean_name(fname or "dosya")
+                raise LinkError(tr(
+                    "Bu bağlantı bir ses veya video dosyası değil, bir web sayfası.\n\n"
+                    "Yalnızca doğrudan dosya bağlantıları desteklenir (örneğin .mp3 veya .mp4 ile biten "
+                    "adresler). Video sitelerindeki sayfa bağlantıları desteklenmez. Dosyanız bilgisayarınızda "
+                    "varsa doğrudan ana ekrandaki alana sürükleyebilirsiniz."))
+            name = self._clean_name(fname or tr("dosya"))
             if os.path.splitext(name)[1].lower() not in MEDIA_EXTS:
                 name += mimetypes.guess_extension(ctype) or ".mp3"
             path = os.path.join(self.folder, name)
@@ -478,7 +658,7 @@ class LinkWorker(threading.Thread):
                         last = time.time()
                         self.q.put(("dl_progress", min(done / total, 1.0)))
         if done == 0:
-            raise LinkError("Bağlantıdan veri gelmedi. Adresi kontrol edin.")
+            raise LinkError(tr("Bağlantıdan veri gelmedi. Adresi kontrol edin."))
         self.q.put(("dl_done", path, name))
 
 
@@ -578,7 +758,7 @@ class ErrorDialog(ctk.CTkToplevel):
         super().__init__(app)
         self.app = app
         self.withdraw()
-        self.title(APP_TITLE)
+        self.title(app_title())
         self.resizable(False, False)
         self.configure(fg_color=app.T("bg"))
 
@@ -595,7 +775,7 @@ class ErrorDialog(ctk.CTkToplevel):
         if body:
             ctk.CTkLabel(text, text=body, text_color=app.T("muted"), font=app.font(13), anchor="w", justify="left",
                          wraplength=380).pack(fill="x", pady=(10, 0))
-        ok = app._primary_button(self, "Tamam", self.close, width=120)
+        ok = app._primary_button(self, tr("Tamam"), self.close, width=120)
         ok.configure(height=40, corner_radius=20, font=app.font(14, True))
         ok.pack(side="bottom", anchor="e", padx=28, pady=(8, 24))
 
@@ -643,7 +823,11 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         super().__init__()
         self.TkdndVersion = TkinterDnD._require(self)
 
+        global LANG
         self.cfg = load_config()
+        LANG = self.cfg.get("ui_lang", "tr")
+        if LANG not in ("tr", "en"):
+            LANG = "tr"
         self.theme_mode = self.cfg.get("theme", "system")
         if self.theme_mode not in [m for m, _ in THEME_MODES]:
             self.theme_mode = "system"
@@ -652,7 +836,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.color = "yumusak"
         ctk.set_appearance_mode(self.theme_mode)
 
-        self.title(APP_TITLE)
+        self.title(app_title())
         self.geometry("920x700")
         self.minsize(780, 640)
         self.configure(fg_color=self.T("bg"))
@@ -671,9 +855,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.fmt = self.cfg.get("format", "docx")
         if self.fmt not in FORMATS:
             self.fmt = "docx"
-        self.language_name = self.cfg.get("language", "Otomatik algıla")
-        if self.language_name not in LANGUAGES:
-            self.language_name = "Otomatik algıla"
+        self.spoken = self.cfg.get("spoken")
+        if self.spoken not in [s[0] for s in SPOKEN]:             # eski sürüm ayarında Türkçe ad saklanıyordu
+            old = self.cfg.get("language")
+            self.spoken = next((s[0] for s in SPOKEN if old in (s[2], s[3])), "auto")
 
         self.busy = False
         self.worker = None
@@ -779,18 +964,70 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         ctk.CTkLabel(brand, image=logo, text="").pack(side="left")
         names = ctk.CTkFrame(brand, fg_color="transparent")
         names.pack(side="left", padx=(12, 0))
-        ctk.CTkLabel(names, text=APP_TITLE, text_color=self.T("ink"), font=self.font(21, True),
+        ctk.CTkLabel(names, text=app_title(), text_color=self.T("ink"), font=self.font(21, True),
                      anchor="w").pack(fill="x")
-        ctk.CTkLabel(names, text=APP_TAGLINE, text_color=self.T("muted"), font=self.font(11.5),
+        ctk.CTkLabel(names, text=app_tagline(), text_color=self.T("muted"), font=self.font(11.5),
                      anchor="w").pack(fill="x")
 
         dot = ctk.CTkImage(light_image=render_dot(pal_l["accent"]), dark_image=render_dot(pal_d["accent"]),
                            size=(14, 14))
         self.theme_btn = ctk.CTkButton(
-            self.header, text="Tema", image=dot, compound="left", width=96, height=36, corner_radius=18,
+            self.header, text=tr("Tema"), image=dot, compound="left", width=96, height=36, corner_radius=18,
             fg_color=self.T("zone"), hover_color=self.T("line"), text_color=self.tone(),
             font=self.font(13, True), command=self._toggle_theme_menu)
-        self.theme_btn.pack(side="right")
+        flag = ctk.CTkImage(light_image=render_flag(LANG), dark_image=render_flag(LANG), size=(24, 16))
+        self.lang_btn = ctk.CTkButton(
+            self.header, text=("English" if LANG == "en" else "Türkçe") + "  ▾", image=flag, compound="left",
+            width=122, height=36, corner_radius=18, fg_color=self.T("zone"), hover_color=self.T("line"),
+            text_color=self.tone(), font=self.font(13, True), command=self._toggle_lang_menu)
+        self._show_header_buttons(True)
+
+    def _show_header_buttons(self, visible):
+        """Tema ve dil butonları yalnızca ana ekranda görünür (tema sağda, dil onun solunda)."""
+        for b in (self.theme_btn, self.lang_btn):
+            b.pack_forget()
+        if visible:
+            self.theme_btn.pack(side="right")
+            self.lang_btn.pack(side="right", padx=(0, 10))
+
+    def _toggle_lang_menu(self):
+        if self.overlay and self.overlay[3] == "lang":
+            self.close_overlay()
+        else:
+            self._open_lang_menu()
+
+    def _open_lang_menu(self):
+        pop = ctk.CTkFrame(self, fg_color=self.T("card"), border_width=1, border_color=self.T("line"),
+                           corner_radius=16)
+        options = (("tr", "Türkçe"), ("en", "English"))
+        for i, (code, name) in enumerate(options):
+            on = code == LANG
+            base = self.TT("card", "accent", 0.18) if on else "transparent"
+            row = ctk.CTkFrame(pop, corner_radius=11, fg_color=base, cursor="hand2")
+            row.pack(fill="x", padx=8, pady=(8 if i == 0 else 0, 8 if i == len(options) - 1 else 2))
+            flag = ctk.CTkImage(light_image=render_flag(code), dark_image=render_flag(code), size=(24, 16))
+            ctk.CTkLabel(row, image=flag, text="   " + name, compound="left", text_color=self.T("ink"),
+                         font=self.font(14, on), anchor="w").pack(side="left", padx=(14, 30), pady=10)
+            hover = self.T("zone")
+            bind_tree(row, "<Enter>", lambda e, r=row, h=hover: r.configure(fg_color=h))
+            row.bind("<Leave>", lambda e, r=row, b=base: Dropdown._leave(r, b, e), add="+")
+            bind_tree(row, "<Button-1>", lambda e, c=code: self.after(10, lambda: self._set_lang(c)))
+        pop.update_idletasks()
+        w = self.lg(pop.winfo_reqwidth())
+        btn_right = self.lg(self.lang_btn.winfo_rootx() - self.winfo_rootx()) + self.lg(self.lang_btn.winfo_width())
+        pop.place(x=btn_right - w, y=68)
+        pop.lift()
+        self.set_overlay(pop, [self.lang_btn], "lang")
+
+    def _set_lang(self, code):
+        global LANG
+        LANG = code
+        self.cfg["ui_lang"] = code
+        save_config(self.cfg)
+        self.close_overlay()
+        self.title(app_title())
+        self._build_header()
+        self.show_home()
 
     def _toggle_theme_menu(self):
         if self.overlay and self.overlay[3] == "theme":
@@ -808,25 +1045,25 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             ctk.CTkLabel(inner, text=text, text_color=self.T("muted"), font=self.font(11, True),
                          anchor="w").pack(fill="x", pady=(0, 6))
 
-        heading("TEMA")
+        heading(tr("TEMA"))
         seg = ctk.CTkFrame(inner, fg_color=self.T("zone"), corner_radius=12)
         seg.pack(fill="x", pady=(0, 14))
         for i, (mode, label) in enumerate(THEME_MODES):
             on = mode == self.theme_mode
-            b = ctk.CTkButton(seg, text=label, width=80, height=30, corner_radius=9, font=self.font(12.5),
+            b = ctk.CTkButton(seg, text=tr(label), width=80, height=30, corner_radius=9, font=self.font(12.5),
                               fg_color=self.T("card") if on else "transparent", hover_color=self.T("line"),
                               text_color=self.T("ink") if on else self.T("muted"),
                               command=lambda m=mode: self.after(10, lambda: self._set_mode(m)))
             b.grid(row=0, column=i, padx=3, pady=3, sticky="ew")
             seg.grid_columnconfigure(i, weight=1, uniform="seg")
 
-        heading("RENK")
+        heading(tr("RENK"))
         grid = ctk.CTkFrame(inner, fg_color="transparent")
         grid.pack(fill="x")
         for i, (key, (label, dot_color, _, _)) in enumerate(COLORS.items()):
             on = key == self.color
             img = ctk.CTkImage(light_image=render_dot(dot_color), dark_image=render_dot(dot_color), size=(18, 18))
-            b = ctk.CTkButton(grid, text=label, image=img, compound="top", width=82, height=62, corner_radius=12,
+            b = ctk.CTkButton(grid, text=tr(label), image=img, compound="top", width=82, height=62, corner_radius=12,
                               fg_color=self.T("zone"), hover_color=self.T("line"), text_color=self.T("ink"),
                               font=self.font(12), border_width=2,
                               border_color=self.T("accent") if on else self.T("zone"),
@@ -932,10 +1169,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             child.destroy()
         self.zone_frame = None
         self.stack = None
-        if page == "home":
-            self.theme_btn.pack(side="right")
-        else:
-            self.theme_btn.pack_forget()
+        self._show_header_buttons(page == "home")
 
     def _label(self, parent, text, size=14, bold=False, color="ink", **kw):
         return ctk.CTkLabel(parent, text=text, text_color=self.T(color), font=self.font(size, bold), **kw)
@@ -966,13 +1200,13 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.link_entry = ctk.CTkEntry(
             link_row, height=48, corner_radius=24, border_width=2, fg_color=self.T("card"),
             border_color=self.T("line"), text_color=self.T("ink"), font=self.font(14),
-            placeholder_text="Ses veya video dosyasının bağlantısını yapıştırın",
+            placeholder_text=tr("Ses veya video dosyasının bağlantısını yapıştırın"),
             placeholder_text_color=self.T("muted"))
         self.link_entry.pack(side="left", fill="x", expand=True)
         self.link_entry.bind("<Return>", lambda e: self._start_link())
         self.link_entry.bind("<FocusIn>", lambda e: self.link_entry.configure(border_color=self.T("accent")))
         self.link_entry.bind("<FocusOut>", lambda e: self.link_entry.configure(border_color=self.T("line")))
-        ctk.CTkButton(link_row, text="Yükle", width=96, height=48, corner_radius=24, fg_color=self.T("accent"),
+        ctk.CTkButton(link_row, text=tr("Yükle"), width=96, height=48, corner_radius=24, fg_color=self.T("accent"),
                       hover_color=self.TT("accent", "ink", 0.12), text_color=self.T("on_accent"),
                       font=self.font(14, True), command=self._start_link).pack(side="left", padx=(10, 0))
 
@@ -982,7 +1216,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         sep.grid_columnconfigure((0, 2), weight=1)
         rule = self.TT("line", "dash", 0.8)
         ctk.CTkFrame(sep, height=3, corner_radius=0, fg_color=rule).grid(row=0, column=0, sticky="ew")
-        self._label(sep, "veya", 13, color="muted", height=20).grid(row=0, column=1, padx=14)
+        self._label(sep, tr("veya"), 13, color="muted", height=20).grid(row=0, column=1, padx=14)
         ctk.CTkFrame(sep, height=3, corner_radius=0, fg_color=rule).grid(row=0, column=2, sticky="ew")
 
         zf = ctk.CTkFrame(stack, fg_color="transparent", width=600, height=380)
@@ -992,11 +1226,11 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.zone_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         zc = self.T("zone")
-        title = ctk.CTkLabel(zf, text="Dosyayı buraya sürükleyebilirsiniz", text_color=self.T("ink"),
+        title = ctk.CTkLabel(zf, text=tr("Dosyayı buraya sürükleyebilirsiniz"), text_color=self.T("ink"),
                              fg_color=zc, bg_color=zc, font=self.font(23, True), cursor="hand2")
-        sub = ctk.CTkLabel(zf, text="ya da buraya tıklayıp seçebilirsiniz", text_color=self.T("muted"),
+        sub = ctk.CTkLabel(zf, text=tr("ya da buraya tıklayıp seçebilirsiniz"), text_color=self.T("muted"),
                            fg_color=zc, bg_color=zc, font=self.font(14.5), cursor="hand2")
-        fmts = ctk.CTkLabel(zf, text="MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası", text_color=self.T("muted"),
+        fmts = ctk.CTkLabel(zf, text=tr("MP3 · WAV · M4A · MP4 · MKV · MOV ve daha fazlası"), text_color=self.T("muted"),
                             fg_color=zc, bg_color=zc, font=self.font(12), cursor="hand2")
         title.place(relx=0.5, rely=0.62, anchor="center")
         sub.place(relx=0.5, rely=0.72, anchor="center")
@@ -1049,7 +1283,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def _browse(self):
         if self.busy:
             return
-        path = filedialog.askopenfilename(title="Ses veya video dosyası seç", filetypes=MEDIA_TYPES)
+        path = filedialog.askopenfilename(title=tr("Ses veya video dosyası seç"), filetypes=media_types())
         if path:
             self._load_file(path)
 
@@ -1070,17 +1304,17 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.busy or self.page != "home":
             return
         if len(paths) > 1:
-            self.notify("Birden fazla dosya seçildi",
-                        "Aynı anda yalnızca bir dosya yükleyebilirsiniz. Lütfen tek bir dosya seçin.")
+            self.notify(tr("Birden fazla dosya seçildi"),
+                        tr("Aynı anda yalnızca bir dosya yükleyebilirsiniz. Lütfen tek bir dosya seçin."))
         elif paths and os.path.isdir(paths[0]):
-            self.notify("Klasör seçildi", "Lütfen klasör yerine tek bir ses veya video dosyası seçin.")
+            self.notify(tr("Klasör seçildi"), tr("Lütfen klasör yerine tek bir ses veya video dosyası seçin."))
         elif paths:
             self._load_file(paths[0])
 
     def _load_file(self, path):
         if not os.path.isfile(path):
-            self.show_error("Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından "
-                            "kullanılmadığından emin olun.")
+            self.show_error(tr("Bu dosya açılamadı.\n\nDosyanın yerinde olduğundan ve başka bir program tarafından "
+                               "kullanılmadığından emin olun."))
             return
         self.file_path = path
         self.display_name = None
@@ -1092,10 +1326,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             return
         url = self.link_entry.get().strip()
         if not url:
-            self.notify("Bağlantı girilmedi", "Lütfen bir ses veya video dosyasının bağlantısını yapıştırın.")
+            self.notify(tr("Bağlantı girilmedi"), tr("Lütfen bir ses veya video dosyasının bağlantısını yapıştırın."))
             return
         if not re.match(r"^https?://\S+$", url, re.IGNORECASE):
-            self.notify("Geçersiz bağlantı", "Bağlantı http:// veya https:// ile başlamalıdır.")
+            self.notify(tr("Geçersiz bağlantı"), tr("Bağlantı http:// veya https:// ile başlamalıdır."))
             return
         self.close_overlay()
         self._cleanup_tmp()
@@ -1103,14 +1337,14 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.busy = True
         self.t_start = None
         host = urllib.parse.urlparse(url).netloc or url
-        self._build_progress_page(host, "Bağlantı kontrol ediliyor…", self._cancel_link)
+        self._build_progress_page(host, tr("Bağlantı kontrol ediliyor…"), self._cancel_link)
         self.link_worker = LinkWorker(url, self.tmp_dir, self.msg_queue)
         self.link_worker.start()
 
     def _cancel_link(self):
         if self.link_worker:
             self.link_worker.cancel.set()
-            self.status_label.configure(text="İptal ediliyor…")
+            self.status_label.configure(text=tr("İptal ediliyor…"))
 
     # ------------------------------------------------------------ 2) seçenekler
     def est_seconds(self, key):
@@ -1135,7 +1369,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             right = ""
             if key != "auto" and self.file_duration:
                 right = fmt_estimate(self.est_seconds(key))
-            items.append(dict(key=key, name=name, desc=desc, right=right))
+            items.append(dict(key=key, name=tr(name), desc=tr(desc), right=right))
         return items
 
     def show_options(self):
@@ -1149,13 +1383,13 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         left.pack(side="left", fill="x", expand=True, padx=22, pady=16)
         name = self.display_name or Path(self.file_path).name
         self._label(left, name if len(name) < 60 else name[:57] + "…", 16, True, anchor="w").pack(fill="x")
-        dur = fmt_duration(self.file_duration) if self.file_duration else "süre okunamadı"
-        self._label(left, f"Süre: {dur}", 13, color="muted", anchor="w").pack(fill="x", pady=(2, 0))
-        self._soft_button(card, "Değiştir", self.show_home, width=100).pack(side="right", padx=18)
+        dur = fmt_duration(self.file_duration) if self.file_duration else tr("süre okunamadı")
+        self._label(left, tr("Süre: {dur}", dur=dur), 13, color="muted", anchor="w").pack(fill="x", pady=(2, 0))
+        self._soft_button(card, tr("Değiştir"), self.show_home, width=100).pack(side="right", padx=18)
 
         row = ctk.CTkFrame(page, fg_color="transparent")
         row.pack(pady=(0, 14))
-        self._label(row, "Çevirme Hızı", 14, True).pack(side="left", padx=(0, 18))
+        self._label(row, tr("Çevirme Hızı"), 14, True).pack(side="left", padx=(0, 18))
         self.speed_dd = Dropdown(
             self, row, 300, self.speed_items, lambda: self.speed, self._on_speed)
         self.speed_dd.btn.pack(side="left")
@@ -1164,7 +1398,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                                      corner_radius=18, width=440, height=142)
         self.est_card.pack_propagate(False)
         self.est_card.pack(pady=(0, 6))
-        self._label(self.est_card, "Tahmini süre", 12.5, color="muted").pack(pady=(14, 0))
+        self._label(self.est_card, tr("Tahmini süre"), 12.5, color="muted").pack(pady=(14, 0))
         self.est_big = self._label(self.est_card, "", 30, True)
         self.est_big.pack(pady=(2, 0))
         self.est_note = self._label(self.est_card, "", 12.5, color="muted")
@@ -1175,16 +1409,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
         lang = ctk.CTkFrame(page, fg_color="transparent")
         lang.pack(fill="x", pady=(18, 0))
-        self._label(lang, "Konuşma dili", 14, True).pack(side="left")
+        self._label(lang, tr("Konuşma dili"), 14, True).pack(side="left")
         menu = ctk.CTkOptionMenu(
-            lang, values=list(LANGUAGES), width=200, height=38, corner_radius=19, font=self.font(13, True),
+            lang, values=[spoken_label(s[0]) for s in SPOKEN], width=200, height=38, corner_radius=19, font=self.font(13, True),
             dropdown_font=self.font(13), fg_color=self.T("zone"), button_color=self.T("zone"),
             button_hover_color=self.T("line"), text_color=self.tone(), dropdown_fg_color=self.T("card"),
             dropdown_text_color=self.tone(), dropdown_hover_color=self.T("zone"), command=self._on_language)
-        menu.set(self.language_name)
+        menu.set(spoken_label(self.spoken))
         menu.pack(side="right")
 
-        self._primary_button(page, "Transkripti başlat", self.start_transcription, width=270).pack(
+        self._primary_button(page, tr("Transkripti başlat"), self.start_transcription, width=270).pack(
             side="bottom", pady=(0, 4))
 
     def _on_speed(self, key):
@@ -1198,13 +1432,15 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         est = self.est_seconds(key)
         self.est_big.configure(text=fmt_estimate(est) if est else "—")
         title, model_name, _, _, size = MODELS[key]
-        self.est_note.configure(text=f"Otomatik: {title} seçildi" if self.speed == "auto" else title)
+        self.est_note.configure(text=tr("Otomatik: {title} seçildi", title=tr(title)) if self.speed == "auto"
+                                else tr(title))
         self.est_note2.configure(
-            text="" if model_cached(model_name) else f"İlk kullanımda ek dosyalar indirilir (yaklaşık {size}, internet gerekir)")
+            text="" if model_cached(model_name) else tr(
+                "İlk kullanımda ek dosyalar indirilir (yaklaşık {size}, internet gerekir)", size=tr(size)))
 
     def _on_language(self, value):
-        self.language_name = value
-        self.cfg["language"] = value
+        self.spoken = next((s[0] for s in SPOKEN if spoken_label(s[0]) == value), "auto")
+        self.cfg["spoken"] = self.spoken
         save_config(self.cfg)
 
     # ------------------------------------------------------------ 3) ilerleme
@@ -1215,9 +1451,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.total_seconds = None
         self.t_start = None
         self.estimate_total = self.est_seconds(self.model_key)
-        self._build_progress_page(self.display_name or Path(self.file_path).name, "Hazırlanıyor…",
+        self._build_progress_page(self.display_name or Path(self.file_path).name, tr("Hazırlanıyor…"),
                                   self.cancel_transcription)
-        self.worker = Worker(self.file_path, self.model_key, LANGUAGES[self.language_name], self.msg_queue)
+        self.worker = Worker(self.file_path, self.model_key, spoken_code(self.spoken), self.msg_queue)
         self.worker.start()
 
     def _build_progress_page(self, name, status, on_cancel):
@@ -1234,12 +1470,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.progress_bar.start()
         self.status_label = self._label(box, status, 15, color="muted", wraplength=520, justify="center")
         self.status_label.pack(pady=(16, 26))
-        self._soft_button(box, "İptal", on_cancel, width=110).pack()
+        self._soft_button(box, tr("İptal"), on_cancel, width=110).pack()
 
     def cancel_transcription(self):
         if self.worker:
             self.worker.cancel.set()
-            self.status_label.configure(text="İptal ediliyor…")
+            self.status_label.configure(text=tr("İptal ediliyor…"))
 
     def _poll_queue(self):
         try:
@@ -1259,8 +1495,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         kind = msg[0]
         if kind == "loading":
             self.status_label.configure(
-                text="İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet "
-                     "bağlantısı gerekir." if msg[1] else "Dönüştürme işlemi hazırlanıyor…")
+                text=tr("İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet "
+                        "bağlantısı gerekir.") if msg[1] else tr("Dönüştürme işlemi hazırlanıyor…"))
         elif kind == "started":
             self.total_seconds = msg[1]
             self.t_start = time.time()
@@ -1279,7 +1515,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.segments = segments
             self.show_result(elapsed)
         elif kind == "dl_progress":
-            self.status_label.configure(text="Dosya indiriliyor…")
+            self.status_label.configure(text=tr("Dosya indiriliyor…"))
             if msg[1] is not None:
                 if self.progress_bar.cget("mode") != "determinate":
                     self.progress_bar.stop()
@@ -1306,7 +1542,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         elif kind == "error":
             self.busy = False
             self.show_options()
-            self.show_error(f"Transkript çıkarılamadı.\n\n{msg[1]}")
+            self.show_error(tr("Transkript çıkarılamadı.\n\n{err}", err=msg[1]))
 
     def _update_eta(self):
         elapsed = time.time() - self.t_start
@@ -1316,9 +1552,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         elif self.estimate_total:
             remaining = max(self.estimate_total - elapsed - 8, 0)
         else:
-            self.status_label.configure(text="Hesaplanıyor…")
+            self.status_label.configure(text=tr("Hesaplanıyor…"))
             return
-        self.status_label.configure(text=f"Tahmini kalan süre: {fmt_duration(remaining)}")
+        self.status_label.configure(text=tr("Tahmini kalan süre: {t}", t=fmt_duration(remaining)))
 
     def _remember_speed(self, elapsed, total):
         if total >= 20:
@@ -1337,8 +1573,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
         head = ctk.CTkFrame(page, fg_color="transparent")
         head.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(2, 12))
-        self._label(head, "Transkript hazır", 22, True).pack(side="left")
-        self._label(head, f"{fmt_duration(elapsed)} sürdü", 13, color="muted").pack(side="left", padx=14, pady=(6, 0))
+        self._label(head, tr("Transkript hazır"), 22, True).pack(side="left")
+        self._label(head, tr("{t} sürdü", t=fmt_duration(elapsed)), 13, color="muted").pack(
+            side="left", padx=14, pady=(6, 0))
         self.sel_hint = self._label(head, "", 13, color="muted")
         self.sel_hint.pack(side="right", pady=(6, 0))
 
@@ -1346,10 +1583,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.var_timed = ctk.BooleanVar(value=False)
         total = len(self.segments)
         shown = self.segments[:PREVIEW_LINES]           # ekranda sadece ilk satırlar; indirilen dosya tamamını içerir
-        note = (f"İlk {PREVIEW_LINES} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir."
-                if total > PREVIEW_LINES else "")
-        self.panel_plain, self.cb_plain, self.tb_plain = self._make_panel(0, "Düz metin", self.var_plain, False, note)
-        self.panel_timed, self.cb_timed, self.tb_timed = self._make_panel(1, "Zaman damgalı", self.var_timed, True, note)
+        note = (tr("İlk {n} satır gösteriliyor (toplam {total} satır). İndirilen dosya tamamını içerir.",
+                   n=PREVIEW_LINES, total=total) if total > PREVIEW_LINES else "")
+        self.panel_plain, self.cb_plain, self.tb_plain = self._make_panel(
+            0, tr("Düz metin"), self.var_plain, False, note)
+        self.panel_timed, self.cb_timed, self.tb_timed = self._make_panel(
+            1, tr("Zaman damgalı"), self.var_timed, True, note)
 
         for tb, timed in ((self.tb_plain, False), (self.tb_timed, True)):
             tb.configure(state="normal")
@@ -1360,18 +1599,18 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 tb.insert("1.0", "\n".join(t for _, _, t in shown))
             if not self.segments:
-                tb.insert("1.0", "(Konuşma bulunamadı)")
+                tb.insert("1.0", tr("(Konuşma bulunamadı)"))
             tb.configure(state="disabled")
         self._style_text_tags()
 
         bar = ctk.CTkFrame(page, fg_color="transparent")
         bar.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(16, 0))
-        self._soft_button(bar, "Yeni dosya", self.show_home, width=120, height=42).pack(side="left")
-        self.dl_btn = self._primary_button(bar, "İndir", self._download, width=200)
+        self._soft_button(bar, tr("Yeni dosya"), self.show_home, width=120, height=42).pack(side="left")
+        self.dl_btn = self._primary_button(bar, tr("İndir"), self._download, width=200)
         self.dl_btn.pack(side="right")
         self.fmt_dd = Dropdown(self, bar, 270, self.format_items, lambda: self.fmt, self._on_format, up=True)
         self.fmt_dd.btn.pack(side="right", padx=(12, 14))
-        self._label(bar, "Dosya biçimi", 14, True).pack(side="right")
+        self._label(bar, tr("Dosya biçimi"), 14, True).pack(side="right")
         self._on_format(self.fmt)
 
     def _make_panel(self, col, title, var, timed, note=""):
@@ -1386,7 +1625,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             checkmark_color=self.T("on_accent"), border_color=self.T("dash"), text_color=self.T("ink"),
             text_color_disabled=self.T("muted"), font=self.font(14, True))
         cb.pack(side="left")
-        copy = self._soft_button(head, "Kopyala", None, width=84, height=28)
+        copy = self._soft_button(head, tr("Kopyala"), None, width=84, height=28)
         copy.configure(font=self.font(12, True))
         copy.pack(side="right")
         # ayırıcı çizgi panelin çerçevesine değmesin (aksi halde çerçeve kesiliyor)
@@ -1412,11 +1651,11 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def _copy(self, timed, button):
         self.clipboard_clear()
         self.clipboard_append(build_text(self.segments, timed))        # ekrandaki önizleme değil, metnin tamamı
-        button.configure(text="Kopyalandı ✓")
-        self.after(1500, lambda: button.winfo_exists() and button.configure(text="Kopyala"))
+        button.configure(text=tr("Kopyalandı ✓"))
+        self.after(1500, lambda: button.winfo_exists() and button.configure(text=tr("Kopyala")))
 
     def format_items(self):
-        return [dict(key=k, name=v[0], desc=v[2], right=v[1]) for k, v in FORMATS.items()]
+        return [dict(key=k, name=tr(v[0]), desc=tr(v[2]), right=v[1]) for k, v in FORMATS.items()]
 
     def _on_format(self, key):
         self.fmt = key
@@ -1436,18 +1675,18 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.panel_plain.configure(border_color=self.T("accent") if plain else self.T("line"))
         self.panel_timed.configure(border_color=self.T("accent") if timed else self.T("line"))
         n = int(plain) + int(timed)
-        self.dl_btn.configure(text="Bir metin seçin" if n == 0 else "İndir" if n == 1 else "2 dosyayı indir",
+        self.dl_btn.configure(text=tr("Bir metin seçin") if n == 0 else tr("İndir") if n == 1 else tr("2 dosyayı indir"),
                               state="disabled" if n == 0 else "normal")
         if self.fmt == "srt":
-            hint = "Sadece zaman damgalı seçildi (altyazı biçimi)"
+            hint = tr("Sadece zaman damgalı seçildi (altyazı biçimi)")
         elif plain and timed:
-            hint = "İkisi de seçildi"
+            hint = tr("İkisi de seçildi")
         elif plain:
-            hint = "Sadece düz metin seçildi"
+            hint = tr("Sadece düz metin seçildi")
         elif timed:
-            hint = "Sadece zaman damgalı seçildi"
+            hint = tr("Sadece zaman damgalı seçildi")
         else:
-            hint = "İndirmek istediklerinizi işaretleyin"
+            hint = tr("İndirmek istediklerinizi işaretleyin")
         self.sel_hint.configure(text=hint)
 
     def _download(self):
@@ -1457,32 +1696,33 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.var_plain.get():
             wanted.append((False, stem))
         if self.var_timed.get():
-            wanted.append((True, f"{stem} (zaman damgalı)"))
+            wanted.append((True, tr("{stem} (zaman damgalı)", stem=stem)))
         if not wanted:
             return
         if len(wanted) == 1:
             path = filedialog.asksaveasfilename(
-                title="Kaydet", initialfile=wanted[0][1], defaultextension=ext,
-                filetypes=[(FORMATS[self.fmt][0], f"*{ext}")])
+                title=tr("Kaydet"), initialfile=wanted[0][1], defaultextension=ext,
+                filetypes=[(tr(FORMATS[self.fmt][0]), f"*{ext}")])
             if not path:
                 return
             targets = [(wanted[0][0], Path(path))]
         else:
-            folder = filedialog.askdirectory(title="Dosyaların kaydedileceği klasörü seçin")
+            folder = filedialog.askdirectory(title=tr("Dosyaların kaydedileceği klasörü seçin"))
             if not folder:
                 return
             targets = [(timed, Path(folder) / f"{name}{ext}") for timed, name in wanted]
             existing = [p.name for _, p in targets if p.exists()]
             if existing and not messagebox.askyesno(
-                    APP_TITLE, "Şu dosyalar zaten var, üzerine yazılsın mı?\n\n" + "\n".join(existing)):
+                    app_title(), tr("Şu dosyalar zaten var, üzerine yazılsın mı?\n\n{files}", files="\n".join(existing))):
                 return
         try:
             for timed, path in targets:
                 write_export(path, self.fmt, stem, self.segments, timed or self.fmt == "srt")
         except Exception as exc:  # noqa: BLE001
-            self.show_error(f"Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({exc})")
+            self.show_error(tr("Dosya kaydedilemedi.\n\nSeçtiğiniz konuma yazılamadı. Başka bir klasör deneyin.\n({err})",
+                               err=exc))
             return
-        self.notify("Dosya indirme işlemi tamamlandı.", warn=False, ms=3600)
+        self.notify(tr("Dosya indirme işlemi tamamlandı."), warn=False, ms=3600)
 
 
 def selftest(audio_path, out_path):
