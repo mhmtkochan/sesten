@@ -13,6 +13,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import webbrowser
 from pathlib import Path
 
 # Pencereli (konsolsuz) exe'de stdout/stderr None olur; tqdm/huggingface çökmesin diye.
@@ -28,6 +29,11 @@ from tkinter import filedialog
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 LANG = "tr"          # arayüz dili: "tr" (varsayılan) ya da "en"
+
+APP_VERSION = "1.1.0"
+REPO = "mhmtkochan/medya-text-donusturucu"
+UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
+UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/MedyaTextKurulum.exe"
 
 # Türkçe metin anahtar, İngilizce karşılığı değer. İngilizce seçilince metin buradan bulunur.
 EN = {
@@ -189,6 +195,7 @@ EN = {
     "Evet, temizle": "Yes, clear",
     "Vazgeç": "Cancel",
     "Üzerine yaz": "Overwrite",
+    "Yeni sürüm var: {v}": "New version available: {v}",
 }
 
 
@@ -1070,6 +1077,29 @@ class LinkWorker(threading.Thread):
         self.q.put(("dl_done", path, name))
 
 
+def version_tuple(tag):
+    return tuple(int(x) for x in re.findall(r"\d+", tag)[:4])
+
+
+class UpdateChecker(threading.Thread):
+    """Açılışta GitHub'daki son sürüm numarasına bakar; daha yeniyse haber verir. Hata olursa sessiz kalır."""
+
+    def __init__(self, out_queue):
+        super().__init__(daemon=True)
+        self.q = out_queue
+
+    def run(self):
+        try:
+            req = urllib.request.Request(UPDATE_API, headers={
+                "User-Agent": f"MedyaText/{APP_VERSION}", "Accept": "application/vnd.github+json"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                tag = json.loads(resp.read().decode("utf-8")).get("tag_name", "")
+            if tag and version_tuple(tag) > version_tuple(APP_VERSION):
+                self.q.put(("upd_found", tag))
+        except Exception:  # noqa: BLE001      # internet yok, sürüm yok, sunucu yanıt vermedi: önemli değil
+            pass
+
+
 # ---------------------------------------------------------------- açılır liste
 def bind_tree(widget, sequence, func):
     widget.bind(sequence, func, add="+")
@@ -1307,6 +1337,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.banner, self.nav_prev = None, None
         self._icon_cache, self._spin_cache = {}, {}
         self._spin_job, self._spin_k = None, 0
+        self.update_tag, self.update_bar = None, None            # GitHub'da daha yeni sürüm var mı
 
         self._build_header()
         self.container = ctk.CTkFrame(self, fg_color="transparent")
@@ -1322,6 +1353,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.show_home()
         self.after(100, self._poll_queue)
+        if self.cfg.get("update_check", True):
+            self.after(2500, lambda: UpdateChecker(self.msg_queue).start())
         self.after(300, self._set_icon)         # CTk kendi simgesini 200 ms sonra koyar, ondan sonra değiştiriyoruz
 
     def show_error(self, message):
@@ -1605,6 +1638,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 child.destroy()
         self.zone_frame = None
         self.stack = None
+        self.update_bar = None
         self._show_header_buttons(page == "home")
 
     def _label(self, parent, text, size=14, bold=False, color="ink", **kw):
@@ -1673,13 +1707,53 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         fmts.place(relx=0.5, rely=0.85, anchor="center")
         for w in (zf, self.zone_label, title, sub, fmts):
             w.bind("<Button-1>", lambda e: self._browse())
+        self._build_update_bar()
         self.after(30, self._layout_zone)
+
+    def _update_visible(self):
+        return bool(self.update_tag) and self.cfg.get("skip_version") != self.update_tag
+
+    def _build_update_bar(self):
+        """Ana ekranın altında "Yeni sürüm var" şeridi (yalnızca daha yeni bir sürüm varsa)."""
+        self.update_bar = None
+        if self.page != "home" or not self._update_visible():
+            return
+        bar = ctk.CTkFrame(self.container, fg_color=self.TT("card", "accent", 0.12), border_width=2,
+                           border_color=self.TT("line", "accent", 0.5), corner_radius=22)
+        ctk.CTkLabel(bar, text=tr("Yeni sürüm var: {v}", v=self.update_tag), text_color=self.T("ink"),
+                     font=self.font(13.5, True)).pack(side="left", padx=(22, 14), pady=10)
+        ctk.CTkButton(bar, text=tr("İndir"), width=88, height=34, corner_radius=17, fg_color=self.T("accent"),
+                      hover_color=self.TT("accent", "ink", 0.12), text_color=self.T("on_accent"),
+                      font=self.font(13, True), command=lambda: webbrowser.open(UPDATE_URL)).pack(
+            side="left", pady=10)
+        ctk.CTkButton(bar, text="✕", width=32, height=32, corner_radius=16, fg_color="transparent",
+                      hover_color=self.T("zone"), text_color=self.T("muted"), font=self.font(14),
+                      command=self._skip_update).pack(side="left", padx=(6, 12), pady=10)
+        bar.place(relx=0.5, rely=1.0, anchor="s")
+        self.update_bar = bar
+
+    def _offer_update(self, tag):
+        self.update_tag = tag
+        if self.page == "home" and self.update_bar is None and self._update_visible():
+            self._build_update_bar()
+            self.zone_size = None
+            self._layout_zone()
+
+    def _skip_update(self):
+        self.cfg["skip_version"] = self.update_tag
+        save_config(self.cfg)
+        if self.update_bar is not None:
+            self.update_bar.destroy()
+            self.update_bar = None
+        self.zone_size = None
+        self._layout_zone()
 
     def _layout_zone(self):
         if self.page != "home" or self.zone_frame is None or not self.zone_frame.winfo_exists():
             return
         cw = self.lg(self.container.winfo_width())
-        ch = self.lg(self.container.winfo_height())
+        reserve = 64 if self.update_bar is not None else 0          # şerit varsa alanı küçült
+        ch = self.lg(self.container.winfo_height()) - reserve
         if cw < 100 or ch < 100:
             return
         above = 48 + 14 + 20 + 14 + 4              # bağlantı alanı + "veya" satırı + boşluklar (+ pay)
@@ -1692,6 +1766,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             return
         self.zone_size = (w, h)
         self.stack.configure(width=w, height=above + h)
+        self.stack.place(relx=0.5, rely=0.5, y=-reserve // 2, anchor="center")
         self.zone_frame.configure(width=w, height=h)
         if self._zone_job:
             self.after_cancel(self._zone_job)
@@ -1935,6 +2010,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         kind = msg[0]
         if kind.startswith("q_"):
             self._handle_queue(msg)
+        elif kind == "upd_found":
+            self._offer_update(msg[1])
         elif kind == "loading":
             self.status_label.configure(
                 text=tr("İlk kullanım için gerekli dosyalar indiriliyor…\nBu işlem yalnızca bir kez yapılır ve internet "

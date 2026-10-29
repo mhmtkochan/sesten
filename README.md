@@ -16,6 +16,7 @@ Dosyanızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da a
 - **Doğrudan dosya bağlantısı** yapıştırarak çeviri (örneğin `.mp3` ya da `.mp4` ile biten adresler).
 - **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
 - Konuşma dili otomatik algılanır ya da elle seçilir (Türkçe dahil 17 dil).
+- **Yeni sürüm bildirimi:** Program açılışta GitHub'daki son sürüm numarasına bakar; daha yeni bir sürüm varsa ana ekranda "İndir" düğmeli bir uyarı çıkar. Kendiliğinden güncellenmez, kurulum dosyasını tarayıcıda siz indirirsiniz. Bağlantı yoksa sessizce atlanır. Kapatmak için `%APPDATA%\MedyaTextDonusturucu\config.json` dosyasına `"update_check": false` ekleyin.
 - **Türkçe ve İngilizce arayüz:** Ana ekranın sağ üstündeki dil butonuyla (bayraklı) değiştirilir. Varsayılan Türkçe'dir.
 
 | Seçenekler | Sonuç |
@@ -113,6 +114,9 @@ plain text or subtitles.
   spoken language, and the first transcript opens as soon as it is ready.
 - Limits: links must point directly to an audio or video file (page links from video sites are
   not supported); Windows only.
+- On startup the program checks GitHub for a newer release and shows a small "New version available" banner with a
+  download button (nothing is installed automatically). To turn this off, add `"update_check": false` to
+  `%APPDATA%\MedyaTextDonusturucu\config.json`.
 - Windows may show a "Windows protected your PC" warning because the program is unsigned. Click "More info", then
   "Run anyway".
 - The source code is MIT licensed. The installer includes GPL-licensed components (x264 and x265 inside FFmpeg),
