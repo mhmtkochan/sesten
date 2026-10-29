@@ -1,4 +1,4 @@
-"""Medya - Text Dönüştürücü: ses ve videoları yazıya çeviren, tamamen çevrimdışı çalışan masaüstü uygulaması."""
+"""sesten: ses ve videoları yazıya çeviren, tamamen çevrimdışı çalışan masaüstü uygulaması."""
 import json
 import math
 import mimetypes
@@ -31,10 +31,10 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
 LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
-APP_VERSION = "1.1.1"
-REPO = "mhmtkochan/medya-text-donusturucu"
+APP_VERSION = "1.2.0"
+REPO = "mhmtkochan/sesten"
 UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
-UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/MedyaTextKurulum.exe"
+UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/sesten-setup.exe"
 
 # Türkçe metin anahtar, İngilizce karşılığı değer. İngilizce seçilince metin buradan bulunur.
 EN = {
@@ -521,13 +521,28 @@ def tr(text, **kw):
 
 
 def app_title():
-    return {"en": "Media - Text Converter", "de": "Medien - Text-Konverter",
-            "it": "Media - Convertitore di testo"}.get(LANG, "Medya - Text Dönüştürücü")
+    return "sesten"
 
 
 def app_tagline():
     return tr("Ses ve videodan yazıya")
-CONFIG_PATH = Path(os.environ.get("APPDATA", Path.home())) / "MedyaTextDonusturucu" / "config.json"
+
+
+_APPDATA = Path(os.environ.get("APPDATA", Path.home()))
+CONFIG_PATH = _APPDATA / "sesten" / "config.json"
+
+
+def _migrate_old_settings():
+    """Programın önceki adıyla kaydedilmiş ayar klasörünü yeni ada taşır (tek seferlik, hata olursa sessiz)."""
+    old = _APPDATA / "MedyaTextDonusturucu"
+    try:
+        if old.is_dir() and not CONFIG_PATH.parent.exists():
+            old.rename(CONFIG_PATH.parent)
+    except Exception:
+        pass
+
+
+_migrate_old_settings()
 FONT = "Segoe UI"
 
 _MEDIA_PATTERN = "*.mp3 *.wav *.m4a *.aac *.ogg *.opus *.flac *.wma *.mp4 *.mkv *.mov *.avi *.webm *.wmv *.flv *.m4v *.3gp"
@@ -1386,7 +1401,7 @@ class LinkWorker(threading.Thread):
 
     def _download(self):
         req = urllib.request.Request(self.url, headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) MedyaText"})
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) sesten"})
         with urllib.request.urlopen(req, timeout=30) as resp:
             ctype = (resp.headers.get_content_type() or "").lower()
             fname = resp.headers.get_filename() or os.path.basename(urllib.parse.urlparse(resp.geturl()).path)
@@ -1437,7 +1452,7 @@ class UpdateChecker(threading.Thread):
     def run(self):
         try:
             req = urllib.request.Request(UPDATE_API, headers={
-                "User-Agent": f"MedyaText/{APP_VERSION}", "Accept": "application/vnd.github+json"})
+                "User-Agent": f"sesten/{APP_VERSION}", "Accept": "application/vnd.github+json"})
             with urllib.request.urlopen(req, timeout=8) as resp:
                 tag = json.loads(resp.read().decode("utf-8")).get("tag_name", "")
             if tag and version_tuple(tag) > version_tuple(APP_VERSION):
@@ -2207,7 +2222,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             return
         self.close_overlay()
         self._cleanup_tmp()
-        self.tmp_dir = tempfile.mkdtemp(prefix="MedyaText_")
+        self.tmp_dir = tempfile.mkdtemp(prefix="sesten_")
         self.busy = True
         self.t_start = None
         host = urllib.parse.urlparse(url).netloc or url
@@ -3288,7 +3303,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
 
 def selftest(audio_path, out_path):
-    """Pencere açmadan transkripsiyon hattını dener: MedyaText.exe --selftest ses.wav sonuc.txt"""
+    """Pencere açmadan transkripsiyon hattını dener: sesten.exe --selftest ses.wav sonuc.txt"""
     q = queue.Queue()
     worker = Worker(audio_path, "fast", None, q)
     worker.start()

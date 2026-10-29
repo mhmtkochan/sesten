@@ -26,8 +26,8 @@ the program. They are downloaded to the user's computer from Hugging Face on fir
 | FFmpeg libraries (inside the PyAV package) | LGPL-2.1+ and GPL-2+ (depending on the component) | https://ffmpeg.org |
 
 **Important note about the GPL:** the FFmpeg build in PyAV's Windows package also contains the GPL-licensed
-`libx264` and `libx265` libraries. Because the compiled installer of this project (`MedyaTextKurulum.exe`,
-`MedyaText.exe`) contains these libraries, the license terms of these components apply to the distribution of the
+`libx264` and `libx265` libraries. Because the compiled installer of this project (`sesten-setup.exe`,
+`sesten.exe`) contains these libraries, the license terms of these components apply to the distribution of the
 binary. The program uses FFmpeg only for **decoding** audio/video, not for encoding. Source code of these components:
 
 - FFmpeg: https://ffmpeg.org/download.html

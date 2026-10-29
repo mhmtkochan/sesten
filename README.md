@@ -1,9 +1,9 @@
-# Media - Text Converter
+# sesten
 
 **English** · [Türkçe](README.tr.md)
 
 A Windows program that turns audio and video files into text, **fully offline**. Drag your files in, pick a speed,
-and download the transcript as Word, PDF, plain text or subtitles. (Turkish name: *Medya - Text Dönüştürücü*.)
+and download the transcript as Word, PDF, plain text or subtitles.
 
 ![Home screen](docs/en/home.png)
 
@@ -26,7 +26,7 @@ and download the transcript as Word, PDF, plain text or subtitles. (Turkish name
 - **Seven colours, light, dark or automatic theme:** Soft, Caramel, Honey, Sage, Ocean, Daffodil, Lavender.
 - **New version notice:** on startup the program checks GitHub for a newer release and shows a small banner with a
   download button. Nothing is installed automatically. To turn this off, add `"update_check": false` to
-  `%APPDATA%\MedyaTextDonusturucu\config.json`.
+  `%APPDATA%\sesten\config.json`.
 
 | Options | Result |
 |---|---|
@@ -40,7 +40,7 @@ and download the transcript as Word, PDF, plain text or subtitles. (Turkish name
 
 ## Installation (for users)
 
-1. Download **`MedyaTextKurulum.exe`** from the [Releases](../../releases) page.
+1. Download **`sesten-setup.exe`** from the [Releases](../../releases) page.
 2. Double-click it and click "Next". No administrator rights are needed; the program is installed in your user folder.
 3. Start it from the Start menu or the desktop shortcut.
 
@@ -73,7 +73,7 @@ for the Accurate speed. The program uses the processor only (no graphics card ne
 Python 3.13 (64-bit) is required.
 
 ```powershell
-git clone https://github.com/mhmtkochan/medya-text-donusturucu.git C:\mt
+git clone https://github.com/mhmtkochan/sesten.git C:\mt
 cd C:\mt
 py -3.13 -m venv venv
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -88,7 +88,7 @@ To build the `.exe` and the installer ([Inno Setup 6](https://jrsoftware.org/isi
 
 > **Keep the folder path short** (for example `C:\mt`). With long paths `onnxruntime` fails with "File name too long".
 
-For a quick check without opening a window: `MedyaText.exe --selftest sound.wav result.txt`
+For a quick check without opening a window: `sesten.exe --selftest sound.wav result.txt`
 (it transcribes the file, tries the Word/PDF writers and writes the result to a text file).
 
 ## Files

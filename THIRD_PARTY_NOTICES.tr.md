@@ -26,7 +26,7 @@ Whisper model dosyaları (Systran tarafından CTranslate2 biçimine çevrilmiş 
 | FFmpeg kütüphaneleri (PyAV paketinin içinde) | LGPL-2.1+ ve GPL-2+ (bileşene göre) | https://ffmpeg.org |
 
 **GPL hakkında önemli not:** PyAV'ın Windows paketindeki FFmpeg derlemesi, GPL lisanslı `libx264` ve `libx265`
-kütüphanelerini de içerir. Bu projenin derlenmiş kurulum dosyası (`MedyaTextKurulum.exe`, `MedyaText.exe`) bu
+kütüphanelerini de içerir. Bu projenin derlenmiş kurulum dosyası (`sesten-setup.exe`, `sesten.exe`) bu
 kütüphaneleri barındırdığı için, ikili dosyanın dağıtımında bu bileşenlerin lisans koşulları geçerlidir.
 Program yalnızca ses/video **çözme** için FFmpeg'i kullanır, kodlama yapmaz. Bu bileşenlerin kaynak kodları:
 

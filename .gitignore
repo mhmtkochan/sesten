@@ -8,8 +8,8 @@ venv/
 build/
 dist/
 *.spec
-MedyaText.exe
-MedyaTextKurulum.exe
+sesten.exe
+sesten-setup.exe
 
 # Temporary and local files
 *.log

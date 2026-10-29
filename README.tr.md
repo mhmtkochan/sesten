@@ -1,10 +1,9 @@
-# Medya - Text Dönüştürücü
+# sesten
 
 [English](README.md) · **Türkçe**
 
 Ses ve video dosyalarını **yazıya çeviren**, internete bağlanmadan çalışan bir Windows programı.
 Dosyalarınızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya da altyazı olarak indirin.
-(İngilizce adı: *Media - Text Converter*.)
 
 ![Giriş ekranı](docs/tr/home.png)
 
@@ -28,7 +27,7 @@ Dosyalarınızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya
 - **Yedi renk, açık / koyu / otomatik tema:** Yumuşak, Karamel, Bal, Adaçayı, Okyanus, Nergis, Lavanta.
 - **Yeni sürüm bildirimi:** Program açılışta GitHub'daki son sürüme bakar; daha yeni bir sürüm varsa ana ekranda
   "İndir" düğmeli küçük bir şerit çıkar. Kendiliğinden güncellenmez. Kapatmak için
-  `%APPDATA%\MedyaTextDonusturucu\config.json` dosyasına `"update_check": false` ekleyin.
+  `%APPDATA%\sesten\config.json` dosyasına `"update_check": false` ekleyin.
 
 | Seçenekler | Sonuç |
 |---|---|
@@ -42,7 +41,7 @@ Dosyalarınızı sürükleyin, hızı seçin, metni Word, PDF, metin dosyası ya
 
 ## Kurulum (kullanıcılar için)
 
-1. [Releases](../../releases) sayfasından **`MedyaTextKurulum.exe`** dosyasını indirin.
+1. [Releases](../../releases) sayfasından **`sesten-setup.exe`** dosyasını indirin.
 2. Çift tıklayıp "İleri" diyerek kurun. Yönetici izni gerekmez, program kullanıcı klasörünüze kurulur.
 3. Başlat menüsünden ya da masaüstü kısayolundan açın.
 
@@ -75,7 +74,7 @@ Program yalnızca işlemciyi kullanır (ekran kartı gerekmez).
 Python 3.13 (64 bit) gerekir.
 
 ```powershell
-git clone https://github.com/mhmtkochan/medya-text-donusturucu.git C:\mt
+git clone https://github.com/mhmtkochan/sesten.git C:\mt
 cd C:\mt
 py -3.13 -m venv venv
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -90,7 +89,7 @@ py -3.13 -m venv venv
 
 > **Klasör yolunu kısa tutun** (örneğin `C:\mt`). Uzun yollarda `onnxruntime` "Dosya adı çok uzun" hatası verir.
 
-Pencere açmadan hızlı bir deneme için: `MedyaText.exe --selftest ses.wav sonuc.txt`
+Pencere açmadan hızlı bir deneme için: `sesten.exe --selftest ses.wav sonuc.txt`
 (çeviriyi ve Word/PDF yazmayı dener, sonucu dosyaya yazar).
 
 ## Dosyalar

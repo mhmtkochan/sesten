@@ -1,4 +1,4 @@
-﻿# Medya - Text Dönüştürücü (Media - Text Converter) build script (Windows, PowerShell)
+﻿# sesten build script (Windows, PowerShell)
 #
 # Requirements:
 #   - Python 3.13 (64-bit, with tkinter)
@@ -7,8 +7,8 @@
 # IMPORTANT: keep the folder path SHORT (for example C:\mt). With long paths onnxruntime fails with
 # "File name too long" and the build breaks.
 #
-# Usage:   .\build.ps1            -> dist\MedyaText.exe and MedyaTextKurulum.exe
-#          .\build.ps1 -ExeOnly   -> dist\MedyaText.exe only
+# Usage:   .\build.ps1            -> dist\sesten.exe and sesten-setup.exe
+#          .\build.ps1 -ExeOnly   -> dist\sesten.exe only
 param([switch]$ExeOnly)
 # Note: "Stop" is not used. In Windows PowerShell 5.1 PyInstaller's info lines (stderr) are wrongly treated as errors.
 # Instead, the success of every command is checked through its exit code.
@@ -35,13 +35,13 @@ if (-not $env:TCL_LIBRARY -and (Test-Path "$base\tcl\tcl8.6")) {
 }
 
 Remove-Item dist, build -Recurse -Force -ErrorAction SilentlyContinue
-.\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name MedyaText `
+.\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name sesten `
     --icon app.ico --add-data "app.ico;." `
     --collect-all faster_whisper --collect-all ctranslate2 --collect-all onnxruntime `
     --collect-all tkinterdnd2 --collect-all customtkinter --collect-all av `
     --collect-all docx --collect-all fpdf --hidden-import tkinter app.py
 Check "PyInstaller"
-Write-Host "Done: dist\MedyaText.exe"
+Write-Host "Done: dist\sesten.exe"
 
 if (-not $ExeOnly) {
     $iscc = @(
@@ -52,7 +52,7 @@ if (-not $ExeOnly) {
     if ($iscc) {
         & $iscc kurulum.iss
         Check "Inno Setup"
-        Write-Host "Done: MedyaTextKurulum.exe"
+        Write-Host "Done: sesten-setup.exe"
     } else {
         Write-Warning "Inno Setup not found, the installer was not built. https://jrsoftware.org/isinfo.php"
     }

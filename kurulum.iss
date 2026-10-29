@@ -1,18 +1,20 @@
-﻿; Medya - Text Dönüştürücü kurulum betiği (Inno Setup 6) / Installer script
-#define AppName "Medya - Text Dönüştürücü"
-#define AppExe "MedyaText.exe"
-#define AppVersion "1.1.1"
+﻿; sesten kurulum betiği (Inno Setup 6) / Installer script
+#define AppName "sesten"
+#define AppExe "sesten.exe"
+#define AppVersion "1.2.0"
 
 [Setup]
+; AppId eski sürümle aynı kalır: yeni kurulum eski sürümün üstüne (güncelleme olarak) kurulur.
 AppId={{B7C3E1A4-5D2F-4C8A-9E61-3F0A7D2B8C15}
 AppName={#AppName}
 AppVersion={#AppVersion}
-DefaultDirName={autopf}\MedyaText
+DefaultDirName={autopf}\sesten
+UsePreviousAppDir=no
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=.
-OutputBaseFilename=MedyaTextKurulum
+OutputBaseFilename=sesten-setup
 SetupIconFile=app.ico
 Compression=lzma2/max
 SolidCompression=yes
@@ -38,6 +40,13 @@ english.LaunchApp=Launch {#AppName} now
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:DesktopIcon}"; GroupDescription: "{cm:TasksGroup}"
+
+; Programın önceki adıyla kurulmuş bir sürüm varsa onun dosyalarını ve kısayollarını kaldırır.
+[InstallDelete]
+Type: files; Name: "{app}\MedyaText.exe"
+Type: files; Name: "{autoprograms}\Medya - Text Dönüştürücü.lnk"
+Type: files; Name: "{autodesktop}\Medya - Text Dönüştürücü.lnk"
+Type: filesandordirs; Name: "{autopf}\MedyaText"
 
 [Files]
 Source: "dist\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
