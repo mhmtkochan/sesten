@@ -32,7 +32,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
 LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
-APP_VERSION = "1.2.1"
+APP_VERSION = "1.2.2"
 REPO = "mhmtkochan/sesten"
 UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/sesten-setup.exe"
@@ -1066,7 +1066,9 @@ MAX_JOBS = 30                    # kuyrukta aynı anda en fazla dosya
 SPEED_NAMES = {key: name for key, name, _ in SPEEDS}
 DANGER = {"light": "#C0392B", "dark": "#E5675A"}
 OK = {"light": "#1F8F4E", "dark": "#5FD08D"}                  # tamamlandı: her temada aynı yeşil
+WAIT = {"light": "#C26A12", "dark": "#F2A65A"}                # sırada bekliyor: turuncumsu
 OK_C, BAD_C = (OK["light"], OK["dark"]), (DANGER["light"], DANGER["dark"])      # (açık, koyu) çiftleri
+WAIT_C = (WAIT["light"], WAIT["dark"])
 
 
 def fmt_pct(p):
@@ -1296,8 +1298,12 @@ class QRow:
 
         info = ctk.CTkFrame(f, fg_color="transparent")
         info.grid(row=0, column=2, sticky="w", padx=(14, 6), pady=12)
-        ctk.CTkLabel(info, text=short_name(job.name, 34), text_color=T("ink"), font=app.font(14.5, True),
-                     anchor="w").pack(fill="x")
+        head = ctk.CTkFrame(info, fg_color="transparent")
+        head.pack(fill="x")
+        self.dot = ctk.CTkLabel(head, text="", width=10, height=10)
+        self.dot.pack(side="left", padx=(0, 8))
+        ctk.CTkLabel(head, text=short_name(job.name, 34), text_color=T("ink"), font=app.font(14.5, True),
+                     anchor="w").pack(side="left")
         self.meta = ctk.CTkLabel(info, text="", text_color=T("muted"), font=app.font(12), anchor="w")
         self.meta.pack(fill="x")
         self.chips = ctk.CTkFrame(info, fg_color="transparent")
@@ -1349,7 +1355,7 @@ class QRow:
         a = self.app
         self.stat.pack_forget()
         colors = {"plain": (a.T("zone"), a.T("muted")),
-                  "queued": (a.TT("card", "accent", 0.22), a.tone()),
+                  "queued": (a.TC("card", WAIT, 0.2), WAIT_C),
                   "error": (tuple(mix(a.pal(m)["card"], DANGER[m], 0.16) for m in ("light", "dark")),
                             (DANGER["light"], DANGER["dark"]))}
         bg, fg = colors[kind]
@@ -1385,6 +1391,7 @@ class QRow:
             est = a.est_seconds(a.model_for(j), j.duration)
             meta = dur + (f" · {tr('tahmini {t}', t=fmt_estimate(est))}" if est else "")
         self.meta.configure(text=meta, text_color=BAD_C if j.status == "error" else T("muted"))
+        self.dot.configure(image=a.status_dot(j.status))
 
         if j.status == "error":
             self.chips.pack_forget()
@@ -2629,6 +2636,18 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self._icon_cache[key] = ctk.CTkImage(
                 light_image=render_file_icon(kind, self.pal("light"), size),
                 dark_image=render_file_icon(kind, self.pal("dark"), size), size=(size, size))
+        return self._icon_cache[key]
+
+    def status_dot(self, status):
+        """Dosya adının yanındaki küçük durum noktası: hazır gri, sırada turuncu, çalışıyor tema rengi, bitti yeşil, hata kırmızı."""
+        key = ("dot", status, self.color)
+        if key not in self._icon_cache:
+            pick = {"queued": WAIT, "done": OK, "error": DANGER}.get(status)
+            if pick is None:
+                name = "accent" if status == "running" else "muted"
+                pick = {m: self.pal(m)[name] for m in ("light", "dark")}
+            self._icon_cache[key] = ctk.CTkImage(light_image=render_dot(pick["light"]),
+                                                 dark_image=render_dot(pick["dark"]), size=(10, 10))
         return self._icon_cache[key]
 
     def ring_frames(self, done=False):

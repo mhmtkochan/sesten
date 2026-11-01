@@ -1,7 +1,7 @@
 ﻿; sesten kurulum betiği (Inno Setup 6) / Installer script
 #define AppName "sesten"
 #define AppExe "sesten.exe"
-#define AppVersion "1.2.1"
+#define AppVersion "1.2.2"
 
 [Setup]
 ; AppId eski sürümle aynı kalır: yeni kurulum eski sürümün üstüne (güncelleme olarak) kurulur.
