@@ -32,7 +32,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
 LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 REPO = "mhmtkochan/sesten"
 UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/sesten-setup.exe"
@@ -1065,6 +1065,8 @@ AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".aac", ".ogg", ".opus", ".flac", ".wma"}
 MAX_JOBS = 30                    # kuyrukta aynı anda en fazla dosya
 SPEED_NAMES = {key: name for key, name, _ in SPEEDS}
 DANGER = {"light": "#C0392B", "dark": "#E5675A"}
+OK = {"light": "#1F8F4E", "dark": "#5FD08D"}                  # tamamlandı: her temada aynı yeşil
+OK_C, BAD_C = (OK["light"], OK["dark"]), (DANGER["light"], DANGER["dark"])      # (açık, koyu) çiftleri
 
 
 def fmt_pct(p):
@@ -1365,8 +1367,9 @@ class QRow:
         self.cb.configure(state="disabled" if locked else "normal")
         running = j.status == "running"
         self.frame.configure(
-            border_color=T("accent") if running else a.TT("line", "accent", 0.45) if (j.checked and not locked)
-            else T("line"),
+            border_color=T("accent") if running else a.TC("line", OK, 0.6) if j.status == "done"
+            else a.TC("line", DANGER, 0.6) if j.status == "error"
+            else a.TT("line", "accent", 0.45) if (j.checked and not locked) else T("line"),
             fg_color=a.TT("card", "accent", 0.06) if running else T("card"))
 
         dur = fmt_duration(j.duration) if j.duration else "—"
@@ -1381,7 +1384,7 @@ class QRow:
         else:
             est = a.est_seconds(a.model_for(j), j.duration)
             meta = dur + (f" · {tr('tahmini {t}', t=fmt_estimate(est))}" if est else "")
-        self.meta.configure(text=meta)
+        self.meta.configure(text=meta, text_color=BAD_C if j.status == "error" else T("muted"))
 
         if j.status == "error":
             self.chips.pack_forget()
@@ -1412,15 +1415,18 @@ class QRow:
 
     def update_progress(self):
         j = self.job
+        T = self.app.T
         if j.status == "running":
             began = j.t_start is not None
-            self.pct.configure(text=fmt_pct(j.pct) if began else "—")
+            self.pct.configure(text=fmt_pct(j.pct) if began else "—", text_color=T("ink"))
+            self.bar.configure(progress_color=T("accent"))
             self.bar.set(j.pct)
-            self.sub.configure(text=(j.eta_text or tr("Hesaplanıyor…")) if began else j.note)
+            self.sub.configure(text=(j.eta_text or tr("Hesaplanıyor…")) if began else j.note, text_color=T("muted"))
         elif j.status == "done":
-            self.pct.configure(text=fmt_pct(1))
+            self.pct.configure(text=fmt_pct(1), text_color=OK_C)
+            self.bar.configure(progress_color=OK_C)
             self.bar.set(1)
-            self.sub.configure(text=tr("Tamamlandı"))
+            self.sub.configure(text=tr("Tamamlandı"), text_color=OK_C)
 
 
 # ---------------------------------------------------------------- arka plan işçisi
@@ -1875,6 +1881,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def TT(self, base, over, t):
         """base rengine over rengini t oranında karıştırır (açık, koyu çifti)."""
         return tuple(mix(self.pal(m)[base], self.pal(m)[over], t) for m in ("light", "dark"))
+
+    def TC(self, base, color, t):
+        """base rengini sabit bir durum rengiyle (OK ya da DANGER) t oranında karıştırır (açık, koyu çifti)."""
+        return tuple(mix(self.pal(m)[base], color[m], t) for m in ("light", "dark"))
 
     def tone(self):
         """Düğme ve menü yazıları için: siyah yerine temanın vurgu renginin koyu (koyu temada açık) tonu."""
@@ -2496,6 +2506,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.status_label.pack(pady=(16, 26))
         self._soft_button(box, tr("İptal"), on_cancel, width=110).pack()
 
+    def _paint_progress(self, value):
+        """%100'e varınca yüzde yazısı ve çubuk yeşile döner."""
+        full = value >= 0.995
+        self.percent_label.configure(text_color=OK_C if full else self.T("ink"))
+        self.progress_bar.configure(progress_color=OK_C if full else self.T("accent"))
+
     def cancel_transcription(self):
         if self.worker:
             self.worker.cancel.set()
@@ -2538,6 +2554,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.progress_value = msg[1]
             self.progress_bar.set(self.progress_value)
             self.percent_label.configure(text=f"{int(self.progress_value * 100)}%")
+            self._paint_progress(self.progress_value)
         elif kind == "done":
             _, segments, elapsed, total = msg
             self.busy = False
@@ -2555,6 +2572,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.progress_bar.configure(mode="determinate")
                 self.progress_bar.set(msg[1])
                 self.percent_label.configure(text=f"{int(msg[1] * 100)}%")
+                self._paint_progress(msg[1])
         elif kind == "dl_done":
             self.busy = False
             self.file_path, self.display_name = msg[1], msg[2]
@@ -2616,7 +2634,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def ring_frames(self, done=False):
         key = (self.color, done)
         if key not in self._spin_cache:
-            light, dark = self.pal("light")["accent"], self.pal("dark")["accent"]
+            light, dark = (OK["light"], OK["dark"]) if done else (self.pal("light")["accent"], self.pal("dark")["accent"])
             self._spin_cache[key] = [
                 ctk.CTkImage(light_image=render_ring(light, k), dark_image=render_ring(dark, k), size=(24, 24))
                 for k in ([None] if done else range(12))]
@@ -2813,13 +2831,19 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             done = [j for j in run if j.status == "done"]
             if len(fin) == len(run):
                 errs = len(run) - len(done)
-                self.q_ov_title.configure(text=tr("Hepsi tamamlandı"))
+                self.q_ov_title.configure(text=tr("Hepsi tamamlandı"), text_color=self.T("ink") if errs else OK_C)
                 self.q_ov_sub.configure(text=tr("{n} transkript hazır · {e} hata", n=len(done), e=errs) if errs
-                                        else tr("{n} transkript hazır", n=len(done)))
+                                        else tr("{n} transkript hazır", n=len(done)),
+                                        text_color=BAD_C if errs else self.T("muted"))
+                self.q_ov_bar.configure(progress_color=self.T("accent") if errs else OK_C)
+                self.q_overall.configure(border_color=self.TC("line", DANGER if errs else OK, 0.55))
             else:
-                self.q_ov_title.configure(text=tr("{done}/{tot} dosya tamamlandı", done=len(fin), tot=len(run)))
+                self.q_ov_title.configure(text=tr("{done}/{tot} dosya tamamlandı", done=len(fin), tot=len(run)),
+                                          text_color=self.T("ink"))
                 self.q_ov_sub.configure(text=tr("Tahmini kalan süre {t}", t=fmt_estimate(left)) if left
-                                        else tr("Hesaplanıyor…"))
+                                        else tr("Hesaplanıyor…"), text_color=self.T("muted"))
+                self.q_ov_bar.configure(progress_color=self.T("accent"))
+                self.q_overall.configure(border_color=self.TT("line", "accent", 0.5))
             self.q_ov_bar.set(sum(1.0 if j.status in ("done", "error") else j.pct for j in run) / len(run))
             if not self.q_ov_shown:
                 self.q_ov_shown = True
@@ -2839,8 +2863,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             lbl, val = "", tr("Tamamlandı")
         else:
             lbl, val = tr("Tahmini toplam süre"), "—"
+        all_ok = (not self.queue_running and not picked and bool(run)
+                  and all(j.status == "done" for j in run))
         self.q_tot_lbl.configure(text=lbl)
-        self.q_tot_val.configure(text=val)
+        self.q_tot_val.configure(text=val, text_color=OK_C if all_ok else self.T("ink"))
 
     def _toggle_all(self):
         on = self.q_all_var.get()
@@ -3134,7 +3160,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         head.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(2, 12))
         if self.queue_mode:
             self._soft_button(head, tr("← Geri"), self.show_queue, width=92, height=38).pack(side="left", padx=(0, 14))
-        self._label(head, tr("Transkript hazır"), 22, True).pack(side="left")
+        title = self._label(head, tr("Transkript hazır"), 22, True)
+        title.configure(text_color=OK_C)
+        title.pack(side="left")
         self.nav_prev = None
         if self.queue_mode:
             self._build_nav(head)
@@ -3275,8 +3303,11 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             idx = run.index(cur) + 1
             self.bn_title.configure(text=tr("Sıradaki dosya dönüştürülüyor · {i}/{n}", i=idx, n=len(run)))
             self.bn_name.configure(text=short_name(cur.name, 60))
+            self.bn_bar.configure(progress_color=self.T("accent"))
             self.bn_bar.set(cur.pct if cur.status == "running" else 0)
-            self.bn_pct.configure(text=fmt_pct(cur.pct) if cur.status == "running" else "—")
+            self.bn_pct.configure(text=fmt_pct(cur.pct) if cur.status == "running" else "—",
+                                  text_color=self.T("ink"))
+            b.configure(border_color=self.TT("line", "accent", 0.5))
             if not self._spin_job:
                 self._spin()
         elif run and all(j.status == "done" for j in run):
@@ -3284,8 +3315,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.bn_icon.configure(image=self.ring_frames(True)[0])
             self.bn_title.configure(text=tr("Tüm dosyalar tamamlandı · {n}/{n}", n=len(run)))
             self.bn_name.configure(text=tr("Transkriptlere kuyruk ekranından ulaşabilirsiniz"))
+            self.bn_bar.configure(progress_color=OK_C)
             self.bn_bar.set(1)
-            self.bn_pct.configure(text="✓")
+            self.bn_pct.configure(text="✓", text_color=OK_C)
+            b.configure(border_color=self.TC("line", OK, 0.55))
         else:
             self._banner_busy = False
             if self._banner_on:
