@@ -1326,6 +1326,68 @@ def render_status(pal, kind, px=18):
     return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
 
 
+def render_line_icon(name, color, px=18):
+    """2 piksel çizgili buton simgesi (Fluent / Lucide tarzı): copy, download, view, link, plus, pause, trash, globe, sun, moon."""
+    S = 4
+    N = px * S
+    u = N / 24
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    c = _rgba(color)
+    w = int(2 * u)
+
+    def T(*ps):
+        return [(x * u, y * u) for x, y in ps]
+
+    def L(*ps):
+        d.line(T(*ps), fill=c, width=w, joint="curve")
+
+    if name == "copy":
+        d.rounded_rectangle(T((8, 8), (20, 20)), radius=2.5 * u, outline=c, width=w)
+        L((5, 15), (4, 15), (4, 4), (15, 4), (15, 5))
+    elif name == "download":
+        L((12, 3.5), (12, 14.5))
+        L((7, 10), (12, 15), (17, 10))
+        L((4, 15.5), (4, 20), (20, 20), (20, 15.5))
+    elif name == "view":
+        d.arc(T((2, 4), (22, 24)), 200, 340, fill=c, width=w)
+        d.arc(T((2, 0), (22, 20)), 20, 160, fill=c, width=w)
+        d.ellipse(T((9, 9), (15, 15)), outline=c, width=w)
+    elif name == "link":
+        d.rounded_rectangle(T((2.5, 8.5), (13, 15.5)), radius=3.5 * u, outline=c, width=w)
+        d.rounded_rectangle(T((11, 8.5), (21.5, 15.5)), radius=3.5 * u, outline=c, width=w)
+    elif name == "sun":
+        d.ellipse(T((8, 8), (16, 16)), outline=c, width=w)
+        for k in range(8):
+            a = k * math.pi / 4
+            L((12 + 6.5 * math.cos(a), 12 + 6.5 * math.sin(a)), (12 + 9 * math.cos(a), 12 + 9 * math.sin(a)))
+    elif name == "moon":
+        m = Image.new("L", (N, N), 0)
+        md = ImageDraw.Draw(m)
+        md.ellipse(T((3, 3), (21, 21)), fill=255)
+        md.ellipse(T((3 + w / u, 3 + w / u), (21 - w / u, 21 - w / u)), fill=0)
+        md.ellipse(T((9, -1), (25, 15)), fill=0)
+        md.arc(T((9, -1), (25, 15)), 90, 200, fill=255, width=w)
+        img.paste(Image.new("RGBA", (N, N), c), (0, 0), m)
+    elif name == "globe":
+        d.ellipse(T((3, 3), (21, 21)), outline=c, width=w)
+        d.ellipse(T((8, 3), (16, 21)), outline=c, width=w)
+        L((3.5, 12), (20.5, 12))
+    elif name == "trash":
+        L((4, 6.5), (20, 6.5))
+        L((9, 6), (9, 3.5), (15, 3.5), (15, 6))
+        L((6, 7), (7, 20.5), (17, 20.5), (18, 7))
+        L((10, 10.5), (10, 17))
+        L((14, 10.5), (14, 17))
+    elif name == "plus":
+        L((12, 5), (12, 19))
+        L((5, 12), (19, 12))
+    elif name == "pause":
+        L((9, 5), (9, 19))
+        L((15, 5), (15, 19))
+    return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
+
+
 def render_pct_ring(pal, pct, px=56, pct_first=True):
     """Yüzde halkası: ortada büyük sayı, küçük ve soluk % işareti; %100'de yeşil halka içinde onay işareti."""
     S = 4
@@ -1481,7 +1543,7 @@ class QRow:
         self.frame.pack(fill="x", pady=(0, 10), padx=(0, 8))
         f = self.frame
         f.grid_columnconfigure(2, weight=1)
-        f.grid_columnconfigure(3, minsize=150)
+        f.grid_columnconfigure(3, minsize=104)
         f.grid_columnconfigure(4, minsize=190)
 
         self.var = ctk.BooleanVar(value=job.checked)
@@ -1516,9 +1578,9 @@ class QRow:
         self.tag_lbl.pack(padx=12, pady=1)
         self.stat = ctk.CTkFrame(self.status, fg_color="transparent")
         self.ring = ctk.CTkLabel(self.stat, text="")
-        self.ring.pack(side="right")
-        self.sub = ctk.CTkLabel(self.stat, text="", text_color=T("muted"), font=app.font(12), anchor="e")
-        self.sub.pack(side="right", padx=(0, 10))
+        self.ring.pack()
+        self.sub = ctk.CTkLabel(self.stat, text="", text_color=T("muted"), font=app.font(12))
+        self.sub.pack(pady=(1, 0))
         self._ring_pct = None
 
         self.actions = ctk.CTkFrame(f, fg_color="transparent", width=1, height=1)   # boşken 200 px yer kaplamasın
@@ -1526,13 +1588,15 @@ class QRow:
         self.btn_x = ctk.CTkButton(self.actions, text="✕", width=32, height=32, corner_radius=16, fg_color="transparent",
                                    hover_color=T("zone"), text_color=T("muted"), font=app.font(15),
                                    command=lambda: app._remove_job(job))
-        self.btn_view = ctk.CTkButton(self.actions, text=tr("Görüntüle"), width=app.bw(tr("Görüntüle"), 96, 12), height=32, corner_radius=16,
-                                      fg_color=T("zone"), hover_color=T("line"), text_color=app.tone(),
-                                      font=app.font(12, True), command=lambda: app.view_job(job))
-        self.btn_dl = ctk.CTkButton(self.actions, text=tr("İndir"), width=app.bw(tr("İndir"), 76, 12), height=32, corner_radius=16,
-                                    fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
+        self.btn_view = ctk.CTkButton(self.actions, text=tr("Görüntüle"), width=app.bw(tr("Görüntüle"), 96, 12) + 24, height=32,
+                                      corner_radius=16, fg_color=T("zone"), hover_color=T("line"), text_color=app.tone(),
+                                      font=app.font(12, True), command=lambda: app.view_job(job),
+                                      image=app.btn_icon("view", "soft", 16), compound="left")
+        self.btn_dl = ctk.CTkButton(self.actions, text=tr("İndir"), width=app.bw(tr("İndir"), 76, 12) + 24, height=32,
+                                    corner_radius=16, fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
                                     text_color=T("on_accent"), font=app.font(12, True),
-                                    command=lambda: app._download_job(job))
+                                    command=lambda: app._download_job(job),
+                                    image=app.btn_icon("download", "accent", 16), compound="left")
         self.update()
 
     def destroy(self):
@@ -2371,17 +2435,19 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def dd_w(self, base):
         return base + 40 if LANG in ("de", "it") else base
 
-    def _primary_button(self, parent, text, command, width=220):
-        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width, 15), height=48,
-                             corner_radius=24,
+    def _primary_button(self, parent, text, command, width=220, icon=None):
+        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width, 15) + (26 if icon else 0),
+                             height=48, corner_radius=24,
                              fg_color=self.T("accent"), hover_color=self.TT("accent", "ink", 0.12),
                              text_color=self.T("on_accent"), text_color_disabled=self.T("on_accent"),
-                             font=self.font(15, True))
+                             font=self.font(15, True),
+                             image=self.btn_icon(icon, "accent", 20) if icon else None, compound="left")
 
-    def _soft_button(self, parent, text, command, width=120, height=38):
-        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width), height=height,
-                             corner_radius=height // 2, fg_color=self.T("zone"), hover_color=self.T("line"),
-                             text_color=self.tone(), font=self.font(13, True))
+    def _soft_button(self, parent, text, command, width=120, height=38, icon=None):
+        return ctk.CTkButton(parent, text=text, command=command, width=self.bw(text, width) + (26 if icon else 0),
+                             height=height, corner_radius=height // 2, fg_color=self.T("zone"),
+                             hover_color=self.T("line"), text_color=self.tone(), font=self.font(13, True),
+                             image=self.btn_icon(icon) if icon else None, compound="left")
 
     # ------------------------------------------------------------ 1) giriş ekranı
     def show_home(self):
@@ -2842,7 +2908,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 dark_image=render_file_icon(kind, self.xpal("dark"), size, ext, state), size=(size, size))
         return self._icon_cache[key]
 
-    def pct_ring(self, pct, px=56):
+    def pct_ring(self, pct, px=50):
         key = ("ring", pct, px, LANG == "tr", self.color)
         if key not in self._icon_cache:
             pf = LANG == "tr"
@@ -2860,6 +2926,18 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self._icon_cache[key] = ctk.CTkImage(
                 light_image=render_seg_bar(self.xpal("light"), states, w, h),
                 dark_image=render_seg_bar(self.xpal("dark"), states, w, h), size=(w, h))
+        return self._icon_cache[key]
+
+    def btn_icon(self, name, role="soft", px=18):
+        """Buton simgesi: role soft = yumuşak butonun yazı rengi, accent = vurgu dolgulu butonun yazı rengi."""
+        key = ("btn", name, role, px, self.color)
+        if key not in self._icon_cache:
+            if role == "accent":
+                light, dark = self.pal("light")["on_accent"], self.pal("dark")["on_accent"]
+            else:
+                light, dark = self.tone()
+            self._icon_cache[key] = ctk.CTkImage(light_image=render_line_icon(name, light, px),
+                                                 dark_image=render_line_icon(name, dark, px), size=(px, px))
         return self._icon_cache[key]
 
     def status_icon(self, kind, px=16):
@@ -2938,7 +3016,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         bar = ctk.CTkFrame(q, fg_color="transparent")
         bar.pack(side="bottom", fill="x")
         bar.grid_columnconfigure(1, weight=1)
-        self.q_clear = self._soft_button(bar, tr("Listeyi temizle"), self._clear_list, width=140, height=42)
+        self.q_clear = self._soft_button(bar, tr("Listeyi temizle"), self._clear_list, width=140, height=42, icon="trash")
         self.q_clear.grid(row=0, column=0)
         tot = ctk.CTkFrame(bar, fg_color="transparent")
         tot.grid(row=0, column=2, padx=(0, 18))
@@ -2946,7 +3024,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.q_tot_lbl.pack(fill="x")
         self.q_tot_val = self._label(tot, "—", 17, True, anchor="e")
         self.q_tot_val.pack(fill="x")
-        self.q_stop = self._soft_button(bar, tr("Kuyruğu durdur"), self._stop_queue, width=150, height=46)
+        self.q_stop = self._soft_button(bar, tr("Kuyruğu durdur"), self._stop_queue, width=150, height=46, icon="pause")
         self.q_stop.grid(row=0, column=3, padx=(0, 10))
         self.q_stop.grid_remove()
         self.q_go = self._primary_button(bar, "", self._start_queue, width=270)
@@ -2973,7 +3051,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self._label(titles, tr("Dönüştürme kuyruğu"), 22, True, anchor="w").pack(fill="x")
         self.q_sub = self._label(titles, "", 13, color="muted", anchor="w")
         self.q_sub.pack(fill="x")
-        self._soft_button(head, tr("+ Dosya ekle"), self._browse, width=120, height=38).pack(side="right")
+        self._soft_button(head, tr("+ Dosya ekle").lstrip("+ "), self._browse, width=120, height=38, icon="plus").pack(side="right")
         self.q_all_var = ctk.BooleanVar(value=True)
         self.q_all = ctk.CTkCheckBox(
             head, text=tr("Tümünü seç"), variable=self.q_all_var, command=self._toggle_all, width=20,
@@ -3422,7 +3500,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         bar = ctk.CTkFrame(page, fg_color="transparent")
         bar.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(16, 0))
         self._soft_button(bar, tr("Yeni dosya"), self._new_file, width=120, height=42).pack(side="left")
-        self.dl_btn = self._primary_button(bar, tr("İndir"), self._download, width=200)
+        self.dl_btn = self._primary_button(bar, tr("İndir"), self._download, width=200, icon="download")
         self.dl_btn.pack(side="right")
         self.fmt_dd = Dropdown(self, bar, self.dd_w(270), self.format_items, lambda: self.fmt, self._on_format, up=True)
         self.fmt_dd.btn.pack(side="right", padx=(12, 14))
@@ -3587,7 +3665,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             checkmark_color=self.T("on_accent"), border_color=self.T("dash"), text_color=self.T("ink"),
             text_color_disabled=self.T("muted"), font=self.font(14, True))
         cb.pack(side="left")
-        copy = self._soft_button(head, tr("Kopyala"), None, width=84, height=28)
+        copy = self._soft_button(head, tr("Kopyala"), None, width=84, height=28, icon="copy")
         copy.configure(font=self.font(12, True))
         copy.pack(side="right")
         # ayırıcı çizgi panelin çerçevesine değmesin (aksi halde çerçeve kesiliyor)
@@ -3638,7 +3716,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.panel_timed.configure(border_color=self.T("accent") if timed else self.T("line"))
         n = int(plain) + int(timed)
         self.dl_btn.configure(text=tr("Bir metin seçin") if n == 0 else tr("İndir") if n == 1 else tr("2 dosyayı indir"),
-                              state="disabled" if n == 0 else "normal")
+                              state="disabled" if n == 0 else "normal",
+                              image=self.btn_icon("download", "accent", 20) if n else None)
         if self.fmt == "srt":
             hint = tr("Sadece zaman damgalı seçildi (altyazı biçimi)")
         elif plain and timed:
