@@ -1213,38 +1213,66 @@ class Job:
         self.sel = False                                 # son çalıştırmaya dahil mi
 
 
-def render_file_icon(kind, pal, size=46):
-    """Temanın vurgu renginde sayfa ikonu (ses: dalga, video: oynat işareti), yuvarlak köşeli zemin üzerinde."""
-    S = 6
+def _check(d, cx, cy, s, col, w):
+    d.line([(cx - .45 * s, cy + .02 * s), (cx - .12 * s, cy + .33 * s), (cx + .45 * s, cy - .3 * s)], fill=col,
+           width=w, joint="curve")
+
+
+def _text_on(color):
+    """Verilen zemin rengi üstünde okunaklı yazı rengi (açık zeminde koyu, koyu zeminde beyaz)."""
+    r, g, b = _hex(color)
+    return "#1C1E22" if 0.299 * r + 0.587 * g + 0.114 * b > 165 else "#FFFFFF"
+
+
+def render_file_icon(kind, pal, size=46, ext=None, state=None):
+    """Sayfa biçimli dosya simgesi: ses dalgası (vurgu rengi) ya da oynat işareti (video rengi).
+    ext verilirse alta büyük harfli uzantı etiketi, state (done/wait/error) verilirse köşeye durum rozeti çizilir.
+    Rozet renkleri için pal içinde ok, wait, bad anahtarları gerekir (App.xpal verir)."""
+    S = 4
     N = size * S
+    u = N / 44
     img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
-    ImageDraw.Draw(img).rounded_rectangle([0, 0, N - 1, N - 1], radius=int(14 / 46 * N), fill=_hex(pal["zone"]))
-    acc = _hex(pal["accent"])
-    u = N * (30 / 46) / 40                      # 40x40'lık çizim alanı karonun ortasındaki 30/46'lık bölgeye sığar
-    off = (N - 40 * u) / 2
+    d = ImageDraw.Draw(img)
+    c = pal["accent"] if kind == "audio" else pal["video"]
 
-    def tf(p):
-        return (off + p[0] * u, off + p[1] * u)
+    def T(p):
+        return (p[0] * u, p[1] * u)
 
-    page = [tf(p) for p in rounded_polygon([(8, 5), (24, 5), (32, 13), (32, 36), (8, 36)], [3, 0, 0, 3, 3], steps=8)]
-    layer = Image.new("RGBA", (N, N), (0, 0, 0, 0))
-    ld = ImageDraw.Draw(layer)
-    w = max(2, int(2 * u))
-    ld.polygon(page, fill=acc + (41,))
-    ld.line(page + [page[0]], fill=acc + (191,), width=w, joint="curve")
-    ld.line([tf(p) for p in [(24, 5), (24, 11), (26, 13), (32, 13)]], fill=acc + (191,), width=w, joint="curve")
+    page = [T(p) for p in rounded_polygon([(8, 3), (26, 3), (35, 12), (35, 40), (8, 40)], [3.5, 0, 0, 3.5, 3.5], 8)]
+    d.polygon(page, fill=_rgba(mix(c, pal["card"], .86)))
+    d.line(page + [page[0]], fill=_rgba(mix(c, pal["card"], .35)), width=int(1.6 * u), joint="curve")
+    d.polygon([T(p) for p in rounded_polygon([(26, 3), (35, 12), (26, 12)], [0, 0, 2.5], 6)],
+              fill=_rgba(mix(c, pal["card"], .45)))
     if kind == "audio":
-        for x, y1, y2 in ((14, 24, 28), (18, 20, 32), (22, 22, 30), (26, 25, 27)):
-            a, b = tf((x, y1)), tf((x, y2))
-            bw = max(2, int(2.4 * u))
-            ld.line([a, b], fill=acc + (217,), width=bw)
-            for cx, cy in (a, b):
-                ld.ellipse([cx - bw / 2, cy - bw / 2, cx + bw / 2, cy + bw / 2], fill=acc + (217,))
+        bw = 2.4 * u
+        for i, hh in enumerate([5, 10, 14, 8, 11]):
+            x = (13.5 + i * 4) * u
+            d.rounded_rectangle([x - bw / 2, (19 - hh / 2) * u, x + bw / 2, (19 + hh / 2) * u], radius=bw / 2,
+                                fill=_rgba(c))
     else:
-        tri = [tf(p) for p in [(16, 21.5), (16, 30.5), (24, 26)]]
-        ld.polygon(tri, fill=acc + (217,))
-        ld.line(tri + [tri[0]], fill=acc + (217,), width=max(2, int(1.6 * u)), joint="curve")
-    img = Image.alpha_composite(img, layer)
+        d.polygon([T((17.5, 13.5)), T((17.5, 24.5)), T((26.5, 19))], fill=_rgba(c))
+        d.line([T((17.5, 13.5)), T((17.5, 24.5)), T((26.5, 19)), T((17.5, 13.5))], fill=_rgba(c),
+               width=int(1.6 * u), joint="curve")
+    if ext:
+        ext = ext[:4]
+        d.rounded_rectangle([T((4, 28)), T((30, 37))], radius=2.2 * u, fill=_rgba(c))
+        f = pil_font(6.2 * u, "bold")
+        d.text((17 * u, 32.5 * u), ext, font=f, fill=_rgba(_text_on(c)), anchor="mm")
+    if state:
+        col = {"done": pal["ok"], "error": pal["bad"], "wait": pal["wait"]}[state]
+        bx, by, r = 36 * u, 36 * u, 7 * u
+        d.ellipse([bx - r - 2 * u, by - r - 2 * u, bx + r + 2 * u, by + r + 2 * u], fill=_rgba(pal["card"]))
+        d.ellipse([bx - r, by - r, bx + r, by + r], fill=_rgba(col))
+        w, white = int(2 * u), _rgba("#FFFFFF")
+        if state == "done":
+            _check(d, bx, by, 8 * u, white, w)
+        elif state == "error":
+            d.line([(bx, by - 3.6 * u), (bx, by + 0.8 * u)], fill=white, width=w)
+            d.ellipse([bx - w / 1.6, by + 3.2 * u - w / 1.6, bx + w / 1.6, by + 3.2 * u + w / 1.6], fill=white)
+        else:
+            d.ellipse([bx - 4 * u, by - 4 * u, bx + 4 * u, by + 4 * u], outline=white, width=int(1.5 * u))
+            d.line([(bx, by - 2.4 * u), (bx, by), (bx + 2 * u, by + 1.4 * u)], fill=white, width=int(1.5 * u),
+                   joint="curve")
     return img.resize((size * 2, size * 2), Image.Resampling.LANCZOS)
 
 
@@ -1374,8 +1402,9 @@ class QRow:
             corner_radius=7, border_width=2, fg_color=T("accent"), hover_color=app.TT("accent", "ink", 0.12),
             checkmark_color=T("on_accent"), border_color=T("dash"))
         self.cb.grid(row=0, column=0, padx=(18, 4), pady=14)
-        self.icon = ctk.CTkLabel(f, text="", image=app.file_icon(job.kind))
+        self.icon = ctk.CTkLabel(f, text="")
         self.icon.grid(row=0, column=1, padx=(8, 0))
+        self._icon_key = "unset"
 
         info = ctk.CTkFrame(f, fg_color="transparent")
         info.grid(row=0, column=2, sticky="w", padx=(14, 6), pady=12)
@@ -1472,6 +1501,12 @@ class QRow:
             est = a.est_seconds(a.model_for(j), j.duration)
             meta = dur + (f" · {tr('tahmini {t}', t=fmt_estimate(est))}" if est else "")
         self.meta.configure(text=meta, text_color=BAD_C if j.status == "error" else T("muted"))
+        icon_key = (j.status if j.status in ("queued", "done", "error") else None)
+        if icon_key != self._icon_key:
+            self._icon_key = icon_key
+            ext = Path(j.path).suffix.lstrip(".").upper() or None
+            badge = {"queued": "wait", "done": "done", "error": "error"}.get(icon_key)
+            self.icon.configure(image=a.file_icon(j.kind, 52, ext, badge))
         self.dot.configure(image=a.status_dot(j.status))
 
         if j.status == "error":
@@ -2711,12 +2746,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         job.id = self.next_id
         return job
 
-    def file_icon(self, kind, size=46):
-        key = (kind, size, self.color)
+    def xpal(self, mode):
+        """Temanın paleti + sabit durum renkleri (ok, wait, bad); rozet ve ilerleme çizimleri için."""
+        return {**self.pal(mode), "ok": OK[mode], "wait": WAIT[mode], "bad": DANGER[mode]}
+
+    def file_icon(self, kind, size=46, ext=None, state=None):
+        key = (kind, size, ext, state, self.color)
         if key not in self._icon_cache:
             self._icon_cache[key] = ctk.CTkImage(
-                light_image=render_file_icon(kind, self.pal("light"), size),
-                dark_image=render_file_icon(kind, self.pal("dark"), size), size=(size, size))
+                light_image=render_file_icon(kind, self.xpal("light"), size, ext, state),
+                dark_image=render_file_icon(kind, self.xpal("dark"), size, ext, state), size=(size, size))
         return self._icon_cache[key]
 
     def status_dot(self, status):
