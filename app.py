@@ -626,34 +626,35 @@ PREVIEW_LINES = 3000         # ekranda gösterilecek en fazla satır; ölçümde
 THEME_MODES = [("system", "Otomatik"), ("light", "Açık"), ("dark", "Koyu")]
 
 
-def _p(bg, zone, dash, ink, muted, card, accent, on_accent, line):
+def _p(bg, zone, dash, ink, muted, card, accent, on_accent, line, video):
+    """video: video dosyaları için ikincil renk (vurgudan net ayrışır); on: vurgu rengi üstündeki yazı (on_accent ile aynı)."""
     return dict(bg=bg, zone=zone, dash=dash, ink=ink, muted=muted, card=card,
-                accent=accent, on_accent=on_accent, line=line)
+                accent=accent, on_accent=on_accent, on=on_accent, line=line, video=video)
 
 
 # renk adı: (görünen ad, örnek nokta rengi, açık palet, koyu palet)
 COLORS = {
     "yumusak": ("Yumuşak", "#8A94A6",
-                _p("#F8F7F5", "#EEECE8", "#C4BFB5", "#2B2A28", "#7B766D", "#FDFDFC", "#6F7C8E", "#F8F7F4", "#E3E0DA"),
-                _p("#1F2023", "#2A2B2F", "#55575E", "#E6E4DF", "#9A9AA0", "#333439", "#9AA7BA", "#1F2023", "#3A3B40")),
+                _p("#F8F7F5", "#EEECE8", "#C4BFB5", "#2B2A28", "#7B766D", "#FDFDFC", "#6F7C8E", "#F8F7F4", "#E3E0DA", "#D9704F"),
+                _p("#1F2023", "#2A2B2F", "#55575E", "#E6E4DF", "#9A9AA0", "#333439", "#9AA7BA", "#1F2023", "#3A3B40", "#F0896A")),
     "karamel": ("Karamel", "#B5763A",
-                _p("#FBF6F0", "#F2E8DB", "#CDB08C", "#3B2A1D", "#8A7360", "#FEFBF7", "#A8672E", "#FFF7EC", "#EADCC8"),
-                _p("#231B15", "#2F251D", "#6A5240", "#F0E4D6", "#A89480", "#3A2E24", "#D08F52", "#231B15", "#43362A")),
+                _p("#FBF6F0", "#F2E8DB", "#CDB08C", "#3B2A1D", "#8A7360", "#FEFBF7", "#A8672E", "#FFF7EC", "#EADCC8", "#2F8F9D"),
+                _p("#231B15", "#2F251D", "#6A5240", "#F0E4D6", "#A89480", "#3A2E24", "#D08F52", "#231B15", "#43362A", "#5FB8C4")),
     "bal": ("Bal", "#D1A24F",
-            _p("#FCF8F0", "#F5ECD8", "#DCC28A", "#3A2F1A", "#8A7B5C", "#FFFCF7", "#D1A24F", "#2E2411", "#EEE2C8"),
-            _p("#211C14", "#2B251A", "#65553A", "#F2E8D3", "#A89B7E", "#342D20", "#D9AE64", "#211C14", "#3D3525")),
+            _p("#FCF8F0", "#F5ECD8", "#DCC28A", "#3A2F1A", "#8A7B5C", "#FFFCF7", "#D1A24F", "#2E2411", "#EEE2C8", "#4F7FD1"),
+            _p("#211C14", "#2B251A", "#65553A", "#F2E8D3", "#A89B7E", "#342D20", "#D9AE64", "#211C14", "#3D3525", "#7AA2F0")),
     "adacayi": ("Adaçayı", "#7C9A84",
-                _p("#F7F9F6", "#EBF0E8", "#BCC8B6", "#25302A", "#6F7D72", "#FCFDFB", "#7C9A84", "#F8FAF6", "#E0E7DB"),
-                _p("#1B211D", "#252C27", "#4C5A4F", "#E3EAE2", "#95A398", "#2E362F", "#9DB9A3", "#1B211D", "#343D36")),
+                _p("#F7F9F6", "#EBF0E8", "#BCC8B6", "#25302A", "#6F7D72", "#FCFDFB", "#7C9A84", "#F8FAF6", "#E0E7DB", "#D2694E"),
+                _p("#1B211D", "#252C27", "#4C5A4F", "#E3EAE2", "#95A398", "#2E362F", "#9DB9A3", "#1B211D", "#343D36", "#EE8A70")),
     "okyanus": ("Okyanus", "#5F86B0",
-                _p("#F5F8FB", "#E9EFF5", "#BCC9D8", "#222C38", "#6B7A8C", "#FBFCFD", "#5F86B0", "#F7F9FB", "#DEE6EE"),
-                _p("#1A1F26", "#232A33", "#475466", "#E2E8F0", "#94A0B0", "#2C343F", "#86A9D1", "#1A1F26", "#333D4A")),
+                _p("#F5F8FB", "#E9EFF5", "#BCC9D8", "#222C38", "#6B7A8C", "#FBFCFD", "#5F86B0", "#F7F9FB", "#DEE6EE", "#E0704F"),
+                _p("#1A1F26", "#232A33", "#475466", "#E2E8F0", "#94A0B0", "#2C343F", "#86A9D1", "#1A1F26", "#333D4A", "#F28F72")),
     "nergis": ("Nergis", "#CDB43A",
-               _p("#FFFEF6", "#F8F4D8", "#D9CF8A", "#33300F", "#807B4A", "#FFFFFB", "#CDB43A", "#2F2B0B", "#EEE9C2"),
-               _p("#1D1C12", "#27261A", "#615E33", "#F4F1D2", "#A9A675", "#302F20", "#E3CB57", "#1D1C12", "#3A3922")),
+               _p("#FFFEF6", "#F8F4D8", "#D9CF8A", "#33300F", "#807B4A", "#FFFFFB", "#CDB43A", "#2F2B0B", "#EEE9C2", "#8A63C9"),
+               _p("#1D1C12", "#27261A", "#615E33", "#F4F1D2", "#A9A675", "#302F20", "#E3CB57", "#1D1C12", "#3A3922", "#AE8CEB")),
     "lavanta": ("Lavanta", "#8C7BB5",
-                _p("#F9F7FB", "#EFEBF4", "#C7BED6", "#2B2535", "#7A6F8A", "#FDFCFE", "#8C7BB5", "#FAF8FC", "#E6E0EE"),
-                _p("#1F1C26", "#292533", "#54496A", "#E8E3F0", "#A196B3", "#322D3E", "#AA9BD2", "#1F1C26", "#3B3548")),
+                _p("#F9F7FB", "#EFEBF4", "#C7BED6", "#2B2535", "#7A6F8A", "#FDFCFE", "#8C7BB5", "#FAF8FC", "#E6E0EE", "#DB6B58"),
+                _p("#1F1C26", "#292533", "#54496A", "#E8E3F0", "#A196B3", "#322D3E", "#AA9BD2", "#1F1C26", "#3B3548", "#F28A78")),
 }
 
 
