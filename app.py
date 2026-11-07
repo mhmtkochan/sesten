@@ -32,7 +32,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 LANG = "tr"          # arayüz dili: "tr" (varsayılan), "en", "de" ya da "it"
 LANGS = [("tr", "Türkçe"), ("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
-APP_VERSION = "1.2.2"
+APP_VERSION = "1.3.0"
 REPO = "mhmtkochan/sesten"
 UPDATE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 UPDATE_URL = f"https://github.com/{REPO}/releases/latest/download/sesten-setup.exe"
