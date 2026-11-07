@@ -1293,6 +1293,61 @@ def render_ring(color, k=None, px=24):
     return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
 
 
+def render_pct_ring(pal, pct, px=56, pct_first=True):
+    """Yüzde halkası: ortada büyük sayı, küçük ve soluk % işareti; %100'de yeşil halka içinde onay işareti."""
+    S = 4
+    N = px * S
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    w = int(N * .1)
+    box = [w / 2, w / 2, N - w / 2, N - w / 2]
+    d.ellipse(box, outline=_rgba(pal["line"]), width=w)
+    if pct >= 100:
+        d.ellipse(box, outline=_rgba(pal["ok"]), width=w)
+        _check(d, N / 2, N / 2, N * .34, _rgba(pal["ok"]), int(N * .085))
+    else:
+        end = -90 + 360 * pct / 100
+        if pct > 0:
+            d.arc(box, -90, end, fill=_rgba(pal["accent"]), width=w)
+            rr = N / 2 - w
+            for a in (-90, end):                                           # yuvarlak uçlar
+                x, y = N / 2 + rr * math.cos(math.radians(a)), N / 2 + rr * math.sin(math.radians(a))
+                d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill=_rgba(pal["accent"]))
+        fs, fb = pil_font(N * .16, "semibold"), pil_font(N * .30, "bold")
+        sign, num = "%", str(pct)
+        ws, wn = d.textlength(sign, font=fs), d.textlength(num, font=fb)
+        gap = N * .015
+        x0 = N / 2 - (ws + wn + gap) / 2
+        base = N / 2 + N * .105
+        if pct_first:
+            d.text((x0, base), sign, font=fs, fill=_rgba(pal["muted"]), anchor="ls")
+            d.text((x0 + ws + gap, base), num, font=fb, fill=_rgba(pal["ink"]), anchor="ls")
+        else:
+            d.text((x0, base), num, font=fb, fill=_rgba(pal["ink"]), anchor="ls")
+            d.text((x0 + wn + gap, base), sign, font=fs, fill=_rgba(pal["muted"]), anchor="ls")
+    return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
+
+
+def render_seg_bar(pal, states, w=260, h=10):
+    """Parçalı genel ilerleme çubuğu: her dosya bir segment. states: (durum, doluluk) listesi,
+    durum ok (bitti), run (çalışıyor, doluluk 0-1), bad (hata) ya da wait (bekliyor)."""
+    S = 4
+    W, H = w * S, h * S
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    n = max(1, len(states))
+    gap = (4 if n <= 10 else 2) * S
+    sw = (W - gap * (n - 1)) / n
+    for i, (st, frac) in enumerate(states):
+        x = i * (sw + gap)
+        track = mix(pal["wait"], pal["card"], .78) if st == "wait" else pal["line"]
+        d.rounded_rectangle([x, 0, x + sw, H - 1], radius=H / 2, fill=_rgba(track))
+        if frac > 0:
+            col = {"ok": pal["ok"], "bad": pal["bad"]}.get(st, pal["accent"])
+            d.rounded_rectangle([x, 0, x + max(H, sw * frac), H - 1], radius=H / 2, fill=_rgba(col))
+    return img.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
+
+
 def render_info_icon(color, fg, px=64):
     """Vurgu renginde yuvarlak içinde 'i' (onay pencereleri için)."""
     S = 4
@@ -1431,13 +1486,11 @@ class QRow:
         self.tag_lbl = ctk.CTkLabel(self.tag, text="", font=app.font(12, True), text_color=T("muted"), height=24)
         self.tag_lbl.pack(padx=12, pady=1)
         self.stat = ctk.CTkFrame(self.status, fg_color="transparent")
-        self.pct = ctk.CTkLabel(self.stat, text="", text_color=T("ink"), font=app.font(19, True), anchor="e")
-        self.pct.pack(fill="x")
-        self.bar = ctk.CTkProgressBar(self.stat, width=120, height=8, corner_radius=4, fg_color=T("zone"),
-                                      progress_color=T("accent"))
-        self.bar.pack(pady=(3, 3))
+        self.ring = ctk.CTkLabel(self.stat, text="")
+        self.ring.pack(side="right")
         self.sub = ctk.CTkLabel(self.stat, text="", text_color=T("muted"), font=app.font(12), anchor="e")
-        self.sub.pack(fill="x")
+        self.sub.pack(side="right", padx=(0, 10))
+        self._ring_pct = None
 
         self.actions = ctk.CTkFrame(f, fg_color="transparent", width=1, height=1)   # boşken 200 px yer kaplamasın
         self.actions.grid(row=0, column=4, padx=(6, 18), sticky="e")
@@ -1537,19 +1590,20 @@ class QRow:
             self.btn_dl.pack(side="left")
 
     def update_progress(self):
-        j = self.job
-        T = self.app.T
+        j, a = self.job, self.app
+        T = a.T
         if j.status == "running":
             began = j.t_start is not None
-            self.pct.configure(text=fmt_pct(j.pct) if began else "—", text_color=T("ink"))
-            self.bar.configure(progress_color=T("accent"))
-            self.bar.set(j.pct)
+            self._set_ring(int(j.pct * 100) if began else 0)
             self.sub.configure(text=(j.eta_text or tr("Hesaplanıyor…")) if began else j.note, text_color=T("muted"))
         elif j.status == "done":
-            self.pct.configure(text=fmt_pct(1), text_color=OK_C)
-            self.bar.configure(progress_color=OK_C)
-            self.bar.set(1)
+            self._set_ring(100)
             self.sub.configure(text=tr("Tamamlandı"), text_color=OK_C)
+
+    def _set_ring(self, pct):
+        if pct != self._ring_pct:
+            self._ring_pct = pct
+            self.ring.configure(image=self.app.pct_ring(min(100, max(0, pct))))
 
 
 # ---------------------------------------------------------------- arka plan işçisi
@@ -2758,6 +2812,26 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 dark_image=render_file_icon(kind, self.xpal("dark"), size, ext, state), size=(size, size))
         return self._icon_cache[key]
 
+    def pct_ring(self, pct, px=56):
+        key = ("ring", pct, px, LANG == "tr", self.color)
+        if key not in self._icon_cache:
+            pf = LANG == "tr"
+            self._icon_cache[key] = ctk.CTkImage(
+                light_image=render_pct_ring(self.xpal("light"), pct, px, pf),
+                dark_image=render_pct_ring(self.xpal("dark"), pct, px, pf), size=(px, px))
+        return self._icon_cache[key]
+
+    def seg_bar(self, states, w=260, h=10):
+        key = ("seg", tuple(states), w, h, self.color)
+        if key not in self._icon_cache:
+            if sum(1 for k in self._icon_cache if k[0] == "seg") > 60:
+                for k in [k for k in self._icon_cache if k[0] == "seg"]:
+                    del self._icon_cache[k]
+            self._icon_cache[key] = ctk.CTkImage(
+                light_image=render_seg_bar(self.xpal("light"), states, w, h),
+                dark_image=render_seg_bar(self.xpal("dark"), states, w, h), size=(w, h))
+        return self._icon_cache[key]
+
     def status_dot(self, status):
         """Dosya adının yanındaki küçük durum noktası: hazır gri, sırada turuncu, çalışıyor tema rengi, bitti yeşil, hata kırmızı."""
         key = ("dot", status, self.color)
@@ -2896,10 +2970,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.q_ov_title.pack(fill="x")
         self.q_ov_sub = self._label(ov_text, "", 12.5, color="muted", anchor="w", height=18)
         self.q_ov_sub.pack(fill="x")
-        self.q_ov_bar = ctk.CTkProgressBar(self.q_overall, width=260, height=10, corner_radius=5,
-                                           fg_color=T("zone"), progress_color=T("accent"))
+        self.q_ov_bar = ctk.CTkLabel(self.q_overall, text="")
         self.q_ov_bar.pack(side="right", padx=22)
-        self.q_ov_bar.set(0)
 
     def _sync_rows(self):
         ids = {j.id for j in self.jobs}
@@ -2974,16 +3046,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.q_ov_sub.configure(text=tr("{n} transkript hazır · {e} hata", n=len(done), e=errs) if errs
                                         else tr("{n} transkript hazır", n=len(done)),
                                         text_color=BAD_C if errs else self.T("muted"))
-                self.q_ov_bar.configure(progress_color=self.T("accent") if errs else OK_C)
                 self.q_overall.configure(border_color=self.TC("line", DANGER if errs else OK, 0.55))
             else:
                 self.q_ov_title.configure(text=tr("{done}/{tot} dosya tamamlandı", done=len(fin), tot=len(run)),
                                           text_color=self.T("ink"))
                 self.q_ov_sub.configure(text=tr("Tahmini kalan süre {t}", t=fmt_estimate(left)) if left
                                         else tr("Hesaplanıyor…"), text_color=self.T("muted"))
-                self.q_ov_bar.configure(progress_color=self.T("accent"))
                 self.q_overall.configure(border_color=self.TT("line", "accent", 0.5))
-            self.q_ov_bar.set(sum(1.0 if j.status in ("done", "error") else j.pct for j in run) / len(run))
+            states = [("ok", 1) if j.status == "done" else ("bad", 1) if j.status == "error"
+                      else ("run", round(j.pct * 50) / 50) if j.status == "running" else ("wait", 0) for j in run]
+            self.q_ov_bar.configure(image=self.seg_bar(states))
             if not self.q_ov_shown:
                 self.q_ov_shown = True
                 self.q_overall.pack(fill="x", pady=(0, 10), before=self.q_list._parent_frame)   # listenin dış çerçevesi
