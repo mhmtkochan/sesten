@@ -1293,6 +1293,39 @@ def render_ring(color, k=None, px=24):
     return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
 
 
+def render_status(pal, kind, px=18):
+    """Durum simgesi: wait (saat), run (açık yay), done (yeşil onay), error (kırmızı çarpı), pause (duraklatıldı)."""
+    S = 4
+    N = px * S
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    w = int(N * .12)
+    box = [w / 2, w / 2, N - w / 2, N - w / 2]
+    c = N / 2
+    white = _rgba("#FFFFFF")
+    if kind == "wait":
+        col = _rgba(pal["wait"])
+        d.ellipse(box, outline=col, width=w)
+        d.line([(c, N * .28), (c, c), (N * .68, N * .62)], fill=col, width=w, joint="curve")
+    elif kind == "run":
+        d.ellipse(box, outline=_rgba(pal["accent"], 70), width=w)
+        d.arc(box, -90, 30, fill=_rgba(pal["accent"]), width=w)
+    elif kind == "done":
+        d.ellipse([0, 0, N - 1, N - 1], fill=_rgba(pal["ok"]))
+        _check(d, c, c, N * .5, white, w)
+    elif kind == "error":
+        d.ellipse([0, 0, N - 1, N - 1], fill=_rgba(pal["bad"]))
+        k = N * .2
+        d.line([(c - k, c - k), (c + k, c + k)], fill=white, width=w)
+        d.line([(c - k, c + k), (c + k, c - k)], fill=white, width=w)
+    elif kind == "pause":
+        col = _rgba(pal["muted"])
+        d.ellipse(box, outline=col, width=w)
+        for x in (N * .41, N * .59):
+            d.line([(x, N * .33), (x, N * .67)], fill=col, width=w)
+    return img.resize((px * 2, px * 2), Image.Resampling.LANCZOS)
+
+
 def render_pct_ring(pal, pct, px=56, pct_first=True):
     """Yüzde halkası: ortada büyük sayı, küçük ve soluk % işareti; %100'de yeşil halka içinde onay işareti."""
     S = 4
@@ -1463,12 +1496,8 @@ class QRow:
 
         info = ctk.CTkFrame(f, fg_color="transparent")
         info.grid(row=0, column=2, sticky="w", padx=(14, 6), pady=12)
-        head = ctk.CTkFrame(info, fg_color="transparent")
-        head.pack(fill="x")
-        self.dot = ctk.CTkLabel(head, text="", width=10, height=10)
-        self.dot.pack(side="left", padx=(0, 8))
-        ctk.CTkLabel(head, text=short_name(job.name, 34), text_color=T("ink"), font=app.font(14.5, True),
-                     anchor="w").pack(side="left")
+        ctk.CTkLabel(info, text=short_name(job.name, 34), text_color=T("ink"), font=app.font(14.5, True),
+                     anchor="w").pack(fill="x")
         self.meta = ctk.CTkLabel(info, text="", text_color=T("muted"), font=app.font(12), anchor="w")
         self.meta.pack(fill="x")
         self.chips = ctk.CTkFrame(info, fg_color="transparent")
@@ -1522,8 +1551,10 @@ class QRow:
                   "error": (tuple(mix(a.pal(m)["card"], DANGER[m], 0.16) for m in ("light", "dark")),
                             (DANGER["light"], DANGER["dark"]))}
         bg, fg = colors[kind]
+        icon = {"queued": "wait", "error": "error"}.get(kind)
         self.tag.configure(fg_color=bg)
-        self.tag_lbl.configure(text=text, text_color=fg)
+        self.tag_lbl.configure(text=text, text_color=fg, compound="left",
+                               image=a.status_icon(icon, 14) if icon else None)
         self.tag.pack(anchor="e")
 
     def update(self):
@@ -1560,7 +1591,6 @@ class QRow:
             ext = Path(j.path).suffix.lstrip(".").upper() or None
             badge = {"queued": "wait", "done": "done", "error": "error"}.get(icon_key)
             self.icon.configure(image=a.file_icon(j.kind, 52, ext, badge))
-        self.dot.configure(image=a.status_dot(j.status))
 
         if j.status == "error":
             self.chips.pack_forget()
@@ -2832,16 +2862,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 dark_image=render_seg_bar(self.xpal("dark"), states, w, h), size=(w, h))
         return self._icon_cache[key]
 
-    def status_dot(self, status):
-        """Dosya adının yanındaki küçük durum noktası: hazır gri, sırada turuncu, çalışıyor tema rengi, bitti yeşil, hata kırmızı."""
-        key = ("dot", status, self.color)
+    def status_icon(self, kind, px=16):
+        key = ("status", kind, px, self.color)
         if key not in self._icon_cache:
-            pick = {"queued": WAIT, "done": OK, "error": DANGER}.get(status)
-            if pick is None:
-                name = "accent" if status == "running" else "muted"
-                pick = {m: self.pal(m)[name] for m in ("light", "dark")}
-            self._icon_cache[key] = ctk.CTkImage(light_image=render_dot(pick["light"]),
-                                                 dark_image=render_dot(pick["dark"]), size=(10, 10))
+            self._icon_cache[key] = ctk.CTkImage(
+                light_image=render_status(self.xpal("light"), kind, px),
+                dark_image=render_status(self.xpal("dark"), kind, px), size=(px, px))
         return self._icon_cache[key]
 
     def ring_frames(self, done=False):
