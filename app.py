@@ -25,7 +25,7 @@ if sys.stderr is None:
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 import customtkinter as ctk
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from tkinter import filedialog
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
@@ -862,36 +862,116 @@ def dashed_line(draw, pts, on, off, width, fill):
         draw.line(seg, fill=fill, width=width, joint="curve")
 
 
+_FONTS = {}
+
+
+def pil_font(size, weight="regular"):
+    """Resim içine yazı çizmek için Segoe UI (Windows'ta hep vardır); bulunamazsa Pillow'un yerleşik yazısı."""
+    key = (int(size), weight)
+    if key not in _FONTS:
+        name = {"bold": "segoeuib.ttf", "semibold": "seguisb.ttf"}.get(weight, "segoeui.ttf")
+        try:
+            _FONTS[key] = ImageFont.truetype(os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", name),
+                                             int(size))
+        except OSError:
+            try:
+                _FONTS[key] = ImageFont.load_default(int(size))
+            except TypeError:
+                _FONTS[key] = ImageFont.load_default()
+    return _FONTS[key]
+
+
+def _rgba(h, a=255):
+    return _hex(h) + (a,)
+
+
+def _is_dark(pal):
+    return sum(_hex(pal["bg"])) < 384
+
+
+def _file_card(pal, kind, u):
+    """Klasörden taşan ses ya da video kartı."""
+    w, h = int(34 * u), int(42 * u)
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], radius=int(5 * u), fill=_rgba(pal["card"]),
+                        outline=_rgba(mix(pal["card"], pal["ink"], .12)), width=max(1, int(1.2 * u)))
+    c = pal["accent"] if kind == "audio" else pal["video"]
+    if kind == "audio":
+        bw = 3.2 * u
+        for i, hh in enumerate([8, 16, 22, 14, 18, 9]):
+            x = w / 2 + (i - 2.5) * 4.6 * u
+            d.rounded_rectangle([x - bw / 2, h * .42 - hh * u / 2, x + bw / 2, h * .42 + hh * u / 2], radius=bw / 2,
+                                fill=_rgba(c))
+    else:
+        cx, cy, r = w / 2, h * .42, 9 * u
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=_rgba(mix(c, pal["card"], .82)))
+        d.polygon([(cx - 3.2 * u, cy - 5 * u), (cx - 3.2 * u, cy + 5 * u), (cx + 5.5 * u, cy)], fill=_rgba(c))
+    for k, ww in ((0, .6), (1, .4)):
+        y = h * .76 + k * 5 * u
+        d.rounded_rectangle([5 * u, y, 5 * u + (w - 10 * u) * ww, y + 2.4 * u], radius=1.2 * u,
+                            fill=_rgba(mix(pal["card"], pal["ink"], .14)))
+    return im
+
+
+def render_folder(pal, px, hover=False, ring=None, out_scale=2):
+    """İki tonlu açık klasör: içinde ses ve video kartı, köşede + rozeti (hover: kartlar yükselir, rozet aşağı ok)."""
+    S = 4
+    N = px * S
+    u = N / 120
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    A, dark = pal["accent"], _is_dark(pal)
+    base = pal["bg"] if dark else "#FFFFFF"
+    back = mix(A, base, .52 if dark else .30)
+    front = mix(A, base, .18 if dark else .58)
+    if hover:
+        back, front = mix(A, base, .35 if dark else .12), mix(A, base, .0 if dark else .38)
+
+    def T(p):
+        return (p[0] * u, p[1] * u)
+
+    d.polygon([T(p) for p in rounded_polygon([(14, 26), (48, 26), (58, 36), (106, 36), (106, 100), (14, 100)],
+                                             [8, 0, 0, 8, 8, 8], steps=10)], fill=_rgba(back))
+    lift = -10 if hover else 0
+    for kind, (cx, cy), ang in (("audio", (45, 50 + lift), 9), ("video", (75, 48 + lift), -8)):
+        c = _file_card(pal, kind, u).rotate(ang, resample=Image.Resampling.BICUBIC, expand=True)
+        img.alpha_composite(c, (int(cx * u - c.width / 2), int(cy * u - c.height / 2)))
+    d.polygon([T(p) for p in rounded_polygon([(8, 58), (112, 58), (106, 104), (14, 104)], [6, 6, 8, 8], steps=10)],
+              fill=_rgba(front))
+    d.line([T((16, 63)), T((104, 63))], fill=_rgba(mix(front, "#FFFFFF", .35)), width=int(2 * u))
+    bx, by, r = 101 * u, 97 * u, 15 * u                                  # rozet
+    d.ellipse([bx - r - 3.5 * u, by - r - 3.5 * u, bx + r + 3.5 * u, by + r + 3.5 * u], fill=_rgba(ring or pal["zone"]))
+    d.ellipse([bx - r, by - r, bx + r, by + r], fill=_rgba(A))
+    w, on = int(3.4 * u), _rgba(pal["on"])
+    if hover:
+        d.line([(bx, by - 7 * u), (bx, by + 6 * u)], fill=on, width=w)
+        d.line([(bx - 6 * u, by + 0.5 * u), (bx, by + 6.5 * u), (bx + 6 * u, by + 0.5 * u)], fill=on, width=w,
+               joint="curve")
+    else:
+        d.line([(bx - 7 * u, by), (bx + 7 * u, by)], fill=on, width=w)
+        d.line([(bx, by - 7 * u), (bx, by + 7 * u)], fill=on, width=w)
+    return img.resize((px * out_scale, px * out_scale), Image.Resampling.LANCZOS)
+
+
 def render_zone(w, h, pal, highlight=False):
-    """Kesikli çerçeveli, ortasında saydam klasör ikonu olan sürükle-bırak alanı (w x h mantıksal px, 2x çıktı)."""
+    """Kesikli çerçeveli sürükle-bırak alanı, ortasında klasör (w x h mantıksal px, 2x çıktı).
+    highlight: dosya sürüklenirken vurgu çerçevesi, %7 vurgu tonlu zemin ve aşağı oklu klasör."""
     S = 4
     W, H = w * S, h * S
-    img = Image.new("RGB", (W, H), _hex(pal["bg"]))
+    fill = mix(pal["zone"], pal["accent"], .07) if highlight else pal["zone"]
+    img = Image.new("RGBA", (W, H), _rgba(pal["bg"]))
     d = ImageDraw.Draw(img)
     radius, bw = 30 * S, int(2.5 * S)
-    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=radius, fill=_hex(pal["zone"]))
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=radius, fill=_rgba(fill))
     inset = bw / 2
     verts = [(inset, inset), (W - 1 - inset, inset), (W - 1 - inset, H - 1 - inset), (inset, H - 1 - inset)]
     outline = rounded_polygon(verts, [radius - inset] * 4, steps=28)
-    dashed_line(d, outline, 10 * S, 7 * S, bw, _hex(pal["accent" if highlight else "dash"]))
-
-    # klasör ikonu
-    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ld = ImageDraw.Draw(layer)
-    k = min(150, h * 0.40) / 120 * S
-    cx, cy = W / 2, h * 0.31 * S
-
-    def tf(p):
-        return (cx + (p[0] - 60) * k, cy + (p[1] - 66) * k)
-
-    shape = [tf(p) for p in rounded_polygon(
-        [(10, 25), (46, 25), (57, 37), (110, 37), (110, 107), (10, 107)], [9, 0, 0, 9, 9, 9], steps=10)]
-    acc = _hex(pal["accent"])
-    ld.polygon(shape, fill=acc + (45,))
-    ld.line([tf((10, 53)), tf((110, 53))], fill=acc + (71,), width=int(3 * k))
-    ld.line(shape + [shape[0]], fill=acc + (143,), width=int(3.5 * k), joint="curve")
-    img = Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB")
-    return img.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
+    dashed_line(d, outline, 10 * S, 7 * S, bw, _rgba(pal["accent" if highlight else "dash"]))
+    px = int(min(150, h * 0.46))
+    folder = render_folder(pal, px, highlight, fill, out_scale=S)
+    img.alpha_composite(folder, (int(W / 2 - folder.width / 2), int(0.31 * H - folder.height / 2)))
+    return img.convert("RGB").resize((w * 2, h * 2), Image.Resampling.LANCZOS)
 
 
 # Program simgeleri: icons/<anahtar>.png (arayüzde) ve .ico (pencere, kısayollar). Varsayılan mavi, .exe'nin simgesi de odur.
